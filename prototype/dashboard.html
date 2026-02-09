@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookmarkManager - Main Dashboard (Verifiction)</title>
+    <style>
+        :root {
+            --accent: #38bdf8;
+            --bg: #0f172a;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            background: var(--bg);
+            color: #f1f5f9;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 2rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 2rem;
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        .glass-card {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            padding: 1.5rem;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+        }
+
+        h2 {
+            color: var(--accent);
+            font-size: 1.2rem;
+            margin-top: 0;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0.5rem;
+        }
+
+        /* Profile & Import Section */
+        .profile-item {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .profile-item code {
+            font-size: 0.75rem;
+            opacity: 0.7;
+            display: block;
+            margin: 0.5rem 0;
+            word-break: break-all;
+        }
+
+        /* Table Styles */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+
+        th {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .source-badge {
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: var(--accent);
+            color: #000;
+        }
+
+        .btn {
+            background: var(--accent);
+            color: #000;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.75rem;
+        }
+
+        .btn:hover {
+            opacity: 0.8;
+        }
+
+        .bookmarklet {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #fff;
+            color: #000;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: bold;
+            margin: 1rem 0;
+            box-shadow: 0 4px 15px rgba(56, 189, 248, 0.4);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="grid">
+        <!-- Sidebar: Tools -->
+        <div class="sidebar">
+            <section class="glass-card mb">
+                <h2>1. Single Add (Bookmarklet)</h2>
+                <p style="font-size: 0.8rem; opacity: 0.7;">Drag this button to your bookmarks bar to test single-add:
+                </p>
+                <a href="javascript:(function(){const title=document.title;const url=window.location.href;fetch('http://localhost:5000/add',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title,url})}).then(r=>r.json()).then(d=>alert('Saved: '+d.received.title))})();"
+                    class="bookmarklet">BookmarkManager Add</a>
+            </section>
+
+            <section class="glass-card" style="margin-top:2rem;">
+                <h2>2. Bulk Import (Detection)</h2>
+                <div id="env-status">Detecting environment...</div>
+                <div id="profiles-list"></div>
+
+                <hr style="border:0; border-top: 1px solid var(--border); margin: 1.5rem 0;">
+
+                <h3>Manual Upload</h3>
+                <p style="font-size: 0.7rem; opacity: 0.6;">Upload an HTML or Chrome JSON 'Bookmarks' file:</p>
+                <input type="file" id="file-input" style="font-size: 0.8rem;">
+                <button class="btn" style="margin-top: 10px;" onclick="uploadFile()">Upload & Parse</button>
+            </section>
+        </div>
+
+        <!-- Main: Bookmark List -->
+        <div class="main">
+            <section class="glass-card">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h2>Verified Bookmark List</h2>
+                    <button class="btn" onclick="refreshList()">Refresh</button>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Source</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bookmark-table-body">
+                        <!-- Data injected here -->
+                    </tbody>
+                </table>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5000';
+
+        async function init() {
+            // 1. Detect Environment
+            try {
+                const res = await fetch(`${API_BASE}/env`);
+                const data = await res.json();
+                document.getElementById('env-status').innerHTML = `<strong>OS:</strong> ${data.env.os}`;
+
+                const profilesList = document.getElementById('profiles-list');
+                profilesList.innerHTML = '';
+                data.env.profiles.forEach(p => {
+                    const item = document.createElement('div');
+                    item.className = 'profile-item';
+                    item.innerHTML = `
+                        <strong>${p.browser}</strong> (${p.name})
+                        <code>${p.path}</code>
+                        <button class="btn" onclick="openAndGuide('${p.path}')">Open Folder & Find File</button>
+                    `;
+                    profilesList.appendChild(item);
+                });
+            } catch (e) { document.getElementById('env-status').innerText = "Backend Offline"; }
+
+            // 2. Initial List Load
+            refreshList();
+        }
+
+        async function refreshList() {
+            try {
+                const res = await fetch(`${API_BASE}/bookmarks`);
+                const data = await res.json();
+                const tbody = document.getElementById('bookmark-table-body');
+                tbody.innerHTML = '';
+                data.data.forEach(bm => {
+                    const row = `<tr>
+                        <td><strong>${bm.title}</strong><br><span style="font-size:0.7rem; opacity:0.5">${bm.url}</span></td>
+                        <td><span class="source-badge">${bm.source}</span></td>
+                        <td style="color:#10b981">✓ Parsed</td>
+                    </tr>`;
+                    tbody.innerHTML += row;
+                });
+            } catch (e) { }
+        }
+
+        async function openAndGuide(path) {
+            await fetch(`${API_BASE}/open_folder`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ path })
+            });
+            alert("Guidance: Finder/Explorer has been opened. Look for the 'Bookmarks' file (no extension) or 'bookmarks.html'.");
+        }
+
+        async function uploadFile() {
+            const input = document.getElementById('file-input');
+            if (!input.files[0]) return alert("Select a file first");
+
+            const formData = new FormData();
+            formData.append('file', input.files[0]);
+
+            const res = await fetch(`${API_BASE}/upload_bulk`, {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+            alert(`Parsed ${data.count} items!`);
+            refreshList();
+        }
+
+        init();
+    </script>
+</body>
+
+</html>
