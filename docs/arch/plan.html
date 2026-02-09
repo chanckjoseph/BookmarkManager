@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plan - Bookmark Manager</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <nav class="sidebar">
+        <h1>Docs Hub</h1>
+        <a href="../index.html"
+            style="margin-bottom: 2rem; display: block; font-size: 0.8rem; color: var(--accent-color);">← Back to
+            Home</a>
+
+        <h3>Architecture</h3>
+        <ul>
+            <li><a href="plan.html" class="active">Implementation Plan</a></li>
+        </ul>
+
+        <h3>Team & Process</h3>
+        <ul>
+            <li><a href="../process/workflow.html">Multi-Agent Workflow</a></li>
+        </ul>
+
+        <h3>History & Sprints</h3>
+        <ul>
+            <li><a href="../sprints/sprint-01/index.html">Sprint 01: Feasibility</a></li>
+        </ul>
+
+        <h3>Source of Truth</h3>
+        <ul>
+            <li><a href="../../.brain_artifacts/implementation_plan.md">Brain: Plan (MD)</a></li>
+            <li><a href="../../.brain_artifacts/multi_agent_workflow.md">Brain: Workflow (MD)</a></li>
+            <li><a href="../../.brain_artifacts/pm_review.md">Brain: PM Review (MD)</a></li>
+            <li><a href="../../.brain_artifacts/task.md">Brain: Tasks (MD)</a></li>
+        </ul>
+    </nav>
+
+    <main class="main-content">
+        <header>
+            <h1>Bookmark Manager Plan</h1>
+            <p>Full architectural blueprint and technical specifications.</p>
+        </header>
+
+        <section class="glass-card">
+            <p>This plan outlines the development of a centralized bookmark manager that works across multiple browsers
+                without requiring extensions or client-side installations.</p>
+        </section>
+
+        <section class="glass-card">
+            <h2>User Review Required</h2>
+            <div
+                style="background: rgba(56, 189, 248, 0.1); border-left: 4px solid var(--accent-color); padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem;">
+                <p><strong>Constraint Check:</strong> The "No Extension" constraint means we cannot automatically sync
+                    in the background like a native browser sync. We will rely on <strong>Bookmarklets</strong> for easy
+                    adding and <strong>Import/Export</strong> handling for bulk synchronization.</p>
+            </div>
+        </section>
+
+        <section class="glass-card">
+            <h2>Features Provided</h2>
+            <ol>
+                <li><strong>Universal Web Access:</strong> Access bookmarks from any device with a browser.</li>
+                <li><strong>No-Install Adding (Bookmarklet):</strong> A special "Add to Bookmarks" link that users drag
+                    to their bookmarks bar. Clicking it on any page instantly saves that page to the manager.</li>
+                <li><strong>Bulk Import/Export:</strong> Support for the standard Netscape Bookmark File Format (.html),
+                    allowing users to move bookmarks to/from Chrome, Firefox, Safari, and Edge.</li>
+                <li><strong>Auto-Detect Environment (Local Migration):</strong> The backend automatically scans the
+                    local filesystem for common browser profile paths to offer "one-click" import of existing local
+                    bookmarks.</li>
+                <li><strong>Smart Metadata:</strong> Automatically fetches the page title, description, and favicon when
+                    a link is added.</li>
+                <li><strong>Organization:</strong>
+                    <ul>
+                        <li><strong>Tags:</strong> Flexible categorization.</li>
+                        <li><strong>Search:</strong> Full-text search of titles and URLs.</li>
+                        <li><strong>Folders:</strong> Hierarchical structure (optional, tags are often better for flat
+                            management).</li>
+                    </ul>
+                </li>
+                <li><strong>Clean Reader View (Optional):</strong> Extract text content for reading (future feature).
+                </li>
+            </ol>
+        </section>
+
+        <section class="glass-card">
+            <h2>User Experience (UX)</h2>
+            <h3>Dashboard (The "Hub")</h3>
+            <ul>
+                <li><strong>Aesthetics:</strong> Glassmorphism design, dark/light mode support, vibrant accent colors.
+                </li>
+                <li><strong>Layout:</strong> A responsive grid of "Cards" for bookmarks, showing the favicon, title, and
+                    a snippet of the description.</li>
+                <li><strong>Interactions:</strong> Hover effects on cards, instant search filtering, easy edit/delete
+                    actions.</li>
+            </ul>
+            <h3>The "Add" Flow</h3>
+            <ol>
+                <li><strong>First Run:</strong> User is presented with a "Drag this to your bookmarks bar" button (The
+                    Bookmarklet).</li>
+                <li><strong>Adding a Site:</strong>
+                    <ul>
+                        <li>User is on <code>example.com</code>.</li>
+                        <li>User clicks the "Save Bookmark" bookmarklet.</li>
+                        <li>A small popup (iframe or new window) opens, confirms the save, allows tagging, and closes
+                            automatically.</li>
+                    </ul>
+                </li>
+            </ol>
+            <h3>Mobile Experience</h3>
+            <ul>
+                <li>Fully responsive design.</li>
+                <li>Uses the native "Share" functionality on Android/iOS (via Web Share Target API if installed as PWA,
+                    or simple copy-paste if not).</li>
+            </ul>
+        </section>
+
+        <section class="glass-card">
+            <h2>Architecture</h2>
+            <h3>Tech Stack</h3>
+            <ul>
+                <li><strong>Frontend:</strong> HTML5, CSS3, Vanilla JS.</li>
+                <li><strong>Design System:</strong> Custom "Rich Aesthetics" CSS (Glassmorphism, animations).</li>
+                <li><strong>Backend Runtime:</strong> <strong>Python 3.11+</strong></li>
+                <li><strong>Framework:</strong> <strong>Flask</strong> or <strong>FastAPI</strong>.</li>
+                <li><strong>Infrastructure Strategy:</strong> Direct host execution (Local/Server). No containerization
+                    for the initial phase.</li>
+                <li><strong>Persistence:</strong> Deferred.</li>
+                <li><strong>Environment:</strong> Standard Python virtual environment (<code>venv</code>).</li>
+            </ul>
+        </section>
+
+        <section class="glass-card">
+            <h2>Feasibility Test Plan: Browser Interaction</h2>
+            <p>Before full implementation, we will verify the core "Add Bookmark" mechanic:</p>
+            <ol>
+                <li><strong>Goal:</strong> Confirm a Bookmarklet (JS) can successfully send page data to a local Python
+                    backend.</li>
+                <li><strong>App:</strong> A minimal Flask server with one POST endpoint (<code>/add</code>).</li>
+                <li><strong>Prototype Components:</strong>
+                    <ul>
+                        <li><code>main.py</code>: Receives URL/Title, prints to console, returns success.</li>
+                        <li><code>bookmarklet.js</code>: A mini-script to drag to the browser bar that calls the local
+                            server.</li>
+                        <li><code>parser.py</code>: Netscape HTML Bookmark parser feasibility test.</li>
+                        <li><code>env_check.py</code>: OS identification and browser profile path detection.</li>
+                    </ul>
+                </li>
+                <li><strong>Verification:</strong>
+                    <ul>
+                        <li>Clicking the bookmarklet on a real site (e.g. <code>google.com</code>) successfully triggers
+                            a log entry in the Python console.</li>
+                        <li>Address CORS (Cross-Origin Resource Sharing) challenges early.</li>
+                        <li>Verify 100% accuracy in parsing `<DT>` and `<DL>` tags from legacy HTML exports.</li>
+                        <li>Confirm backend can correctly identify the host OS and detect profile directories.</li>
+                    </ul>
+                </li>
+            </ol>
+        </section>
+
+        <section class="glass-card">
+            <h2>Verification Plan</h2>
+            <h3>Automated Tests</h3>
+            <ul>
+                <li><strong>Backend:</strong> Unit tests for the Metadata Fetcher (mocking HTTP requests).</li>
+                <li><strong>API:</strong> Integration tests for adding, retrieving, and deleting bookmarks.</li>
+            </ul>
+            <h3>Manual Verification</h3>
+            <ul>
+                <li><strong>Bookmarklet Test:</strong> Drag the bookmarklet to the bar, visit a site (e.g.,
+                    <code>google.com</code>), click, and verify it appears on the dashboard.
+                </li>
+                <li><strong>Import Test:</strong> Export bookmarks from Chrome, import them into the app, and verify
+                    count and data integrity.</li>
+                <li><strong>Responsiveness:</strong> Open the dashboard on a mobile viewport and verify usability.</li>
+            </ul>
+        </section>
+
+        <footer
+            style="text-align: center; margin-top: 3rem; color: var(--text-dim); font-size: 0.8rem; border-top: 1px solid var(--glass-border); padding-top: 2rem;">
+            &copy; 2026 Bookmark Manager Team | <strong>Last Updated:</strong> 2026-02-09
+        </footer>
+    </main>
+</body>
+
+</html>

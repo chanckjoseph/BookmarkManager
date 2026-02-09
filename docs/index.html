@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docs Hub - Bookmark Manager</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <nav class="sidebar">
+        <h1>Docs Hub</h1>
+
+        <h3>Architecture</h3>
+        <ul>
+            <li><a href="arch/plan.html">Implementation Plan</a></li>
+        </ul>
+
+        <h3>Team & Process</h3>
+        <ul>
+            <li><a href="process/workflow.html">Multi-Agent Workflow</a></li>
+        </ul>
+
+        <h3>History & Sprints</h3>
+        <ul>
+            <li><a href="sprints/sprint-01/index.html">Sprint 01: Feasibility</a></li>
+        </ul>
+
+        <h3>Source of Truth</h3>
+        <ul>
+            <li><a href=".brain_artifacts/implementation_plan.md">Brain: Plan (MD)</a></li>
+            <li><a href=".brain_artifacts/multi_agent_workflow.md">Brain: Workflow (MD)</a></li>
+            <li><a href=".brain_artifacts/pm_review.md">Brain: PM Review (MD)</a></li>
+            <li><a href=".brain_artifacts/task.md">Brain: Tasks (MD)</a></li>
+        </ul>
+    </nav>
+
+    <main class="main-content">
+        <header>
+            <h1>Bookmark Manager</h1>
+            <p>Master Documentation Hub for the Multi-Agent Development Team.</p>
+        </header>
+
+        <section class="glass-card">
+            <h2>Welcome</h2>
+            <p>This organized hub contains all tactical and architectural documentation for the Bookmark Manager
+                project. Use the sidebar to navigate between different categories.</p>
+            <p>This hub is maintained by the <strong>Doc Manager</strong> agent with a mandate for <strong>Zero
+                    Summarization</strong> and <strong>Maximum Fidelity</strong> to the source brain artifacts.</p>
+        </section>
+
+        <section class="glass-card">
+            <h2>Sprint History</h2>
+            <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 1rem;">
+                <a href="sprints/sprint-01/index.html" class="glass-card"
+                    style="flex: 1; min-width: 200px; padding: 1.5rem; text-decoration: none; color: inherit; transition: transform 0.2s;">
+                    <h3 style="margin-top: 0; color: var(--accent-color);">Sprint 01</h3>
+                    <p style="font-size: 0.9rem; margin-bottom: 0;">Feasibility Prototype & Workflow Design</p>
+                    <span class="badge" style="margin-top: 10px; display: inline-block;">COMPLETED</span>
+                </a>
+                <div class="glass-card"
+                    style="flex: 1; min-width: 200px; padding: 1.5rem; border: 1px dashed var(--glass-border); opacity: 0.6;">
+                    <h3 style="margin-top: 0; color: var(--text-dim);">Sprint 02</h3>
+                    <p style="font-size: 0.9rem; margin-bottom: 0;">MVP Core Development (CRUD & SQLite)</p>
+                    <span class="badge"
+                        style="margin-top: 10px; display: inline-block; background: var(--glass-bg);">UPCOMING</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="glass-card">
+            <h2>Current Project Status</h2>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <span class="badge">Planning: Finalized</span>
+                <span class="badge" style="background: var(--accent-color); color: #000;">Sprint 01: In Progress</span>
+                <span class="badge" style="background: var(--glass-bg);">Phase: Feasibility (v1.2)</span>
+            </div>
+        </section>
+
+        <footer
+            style="text-align: center; margin-top: 3rem; color: var(--text-dim); font-size: 0.8rem; border-top: 1px solid var(--glass-border); padding-top: 2rem;">
+            &copy; 2026 Bookmark Manager Team | <strong>Last Updated:</strong> 2026-02-09
+        </footer>
+    </main>
+</body>
+
+</html>

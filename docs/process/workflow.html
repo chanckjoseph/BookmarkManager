@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workflow - Bookmark Manager</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'dark',
+            themeVariables: {
+                primaryColor: '#38bdf8',
+                primaryTextColor: '#fff',
+                primaryBorderColor: '#38bdf8',
+                lineColor: '#38bdf8',
+                secondaryColor: '#1e293b',
+                tertiaryColor: '#0f172a'
+            }
+        });
+    </script>
+</head>
+
+<body>
+    <nav class="sidebar">
+        <h1>Docs Hub</h1>
+        <a href="../index.html"
+            style="margin-bottom: 2rem; display: block; font-size: 0.8rem; color: var(--accent-color);">← Back to
+            Home</a>
+
+        <h3>Architecture</h3>
+        <ul>
+            <li><a href="../arch/plan.html">Implementation Plan</a></li>
+        </ul>
+
+        <h3>Team & Process</h3>
+        <ul>
+            <li><a href="workflow.html" class="active">Multi-Agent Workflow</a></li>
+        </ul>
+
+        <h3>History & Sprints</h3>
+        <ul>
+            <li><a href="../sprints/sprint-01/index.html">Sprint 01: Feasibility</a></li>
+        </ul>
+
+        <h3>Source of Truth</h3>
+        <ul>
+            <li><a href="../../.brain_artifacts/implementation_plan.md">Brain: Plan (MD)</a></li>
+            <li><a href="../../.brain_artifacts/multi_agent_workflow.md">Brain: Workflow (MD)</a></li>
+            <li><a href="../../.brain_artifacts/pm_review.md">Brain: PM Review (MD)</a></li>
+            <li><a href="../../.brain_artifacts/task.md">Brain: Tasks (MD)</a></li>
+        </ul>
+    </nav>
+
+    <main class="main-content">
+        <header>
+            <h1>Multi-Agent Development Workflow</h1>
+            <p>Guidelines for collaborative agent development and release management.</p>
+        </header>
+
+        <section class="glass-card">
+            <h2>Team Roles & Personas</h2>
+            <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+                <thead>
+                    <tr style="text-align: left; border-bottom: 2px solid var(--accent-color);">
+                        <th style="padding: 10px;">Role</th>
+                        <th style="padding: 10px;">Behavioral Persona</th>
+                        <th style="padding: 10px;">Sprint Ownership</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Architect</strong></td>
+                        <td><strong>The Visionary Realist</strong>: Global integrity & scalability master.</td>
+                        <td>Global</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Product Manager</strong></td>
+                        <td><strong>The Uncompromising Auditor</strong>: Strategic detail & gap analysis.</td>
+                        <td><span class="badge">Per Sprint</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Engineer</strong></td>
+                        <td><strong>The Precision Craftsman</strong>: Rich aesthetics & zero-leak logic.</td>
+                        <td>Feature-Based</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Release Manager</strong></td>
+                        <td><strong>The Sentinel</strong>: Git hygiene & merge-safety enforcement.</td>
+                        <td>Global</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Doc Manager</strong></td>
+                        <td><strong>The Fidelity Officer</strong>: Information architecture & sync master.</td>
+                        <td>Global</td>
+                    </tr>
+                    <tr>
+                        <td><strong>QA Engineer</strong></td>
+                        <td><strong>The Adversarial Tester</strong>: Methodical hunter of edge cases.</td>
+                        <td><span class="badge">Per Sprint</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>DevOps</strong></td>
+                        <td><strong>The Stabilizer</strong>: Environment & deployment reliability.</td>
+                        <td>Global</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section class="glass-card">
+            <h2>Sprint-Specific Release Cycle</h2>
+            <div class="mermaid"
+                style="background: rgba(var(--accent-color-rgb), 0.05); padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem; border: 1px solid var(--glass-border);">
+                graph TD
+                A["Architect & Sprint PM: Strategy & Requirements"] --> B["Doc Manager: Initial Hub Setup"]
+                B --> C["Feature Agent: Implementation (feat/ branch)"]
+                C --> D["Sprint QA: Verification (test_report.md)"]
+                D --> E["Sprint PM: Strategic Review (pm_review.md)"]
+                E --> F["Doc Manager: Final Doc Sync (Audit)"]
+                F --> G["Release Manager: Merge & Release"]
+                G --> H["DevOps: Environment Sync"]
+
+                style A fill:#1e293b,stroke:#38bdf8,stroke-width:2px,color:#fff
+                style B fill:#1e293b,stroke:#38bdf8,stroke-width:2px,color:#fff
+                style C fill:#1e293b,stroke:#38bdf8,stroke-width:2px,color:#fff
+                style D fill:#1e293b,stroke:#f59e0b,stroke-width:2px,color:#fff
+                style E fill:#1e293b,stroke:#f59e0b,stroke-width:2px,color:#fff
+                style F fill:#1e293b,stroke:#38bdf8,stroke-width:2px,color:#fff
+                style G fill:#1e293b,stroke:#38bdf8,stroke-width:2px,color:#fff
+                style H fill:#1e293b,stroke:#38bdf8,stroke-width:2px,color:#fff
+            </div>
+            <ol>
+                <li><strong>Stage 1: Strategy & Tasking (Architect & Sprint PM):</strong>
+                    <ul>
+                        <li><strong>Sprint PM:</strong> Defines focus and requirements for the current sprint duration.
+                        </li>
+                    </ul>
+                </li>
+                <li><strong>Stage 2: Doc Initialization (Doc Manager):</strong> Prepares feature context.</li>
+                <li><strong>Stage 3: Development (Feature Agent):</strong> Implementation and unit testing.</li>
+                <li><strong>Stage 4: Documentation (Doc Manager):</strong> Updates hub with development progress.</li>
+                <li><strong>Stage 5: Verification (Sprint QA Engineer):</strong>
+                    <ul>
+                        <li>Dedicated tester for the current sprint.</li>
+                        <li>Executes focused Feature/Integration tests.</li>
+                    </ul>
+                </li>
+                <li><strong>Stage 6: PM Strategic Review (Sprint PM):</strong>
+                    <ul>
+                        <li>Final product check against sprint objectives.</li>
+                        <li>Generates <code>pm_review.md</code> for the next milestone.</li>
+                    </ul>
+                </li>
+                <li><strong>Stage 7: Final Documentation & Release (Doc Manager & Release Manager):</strong> 1:1 sync
+                    and technical merge.</li>
+                <li><strong>Stage 8: Environment Sync (DevOps):</strong> Global synchronization.</li>
+            </ol>
+        </section>
+
+        <section class="glass-card">
+            <h2>Version Control Strategy (Sprint Branching)</h2>
+            <p>The <strong>Release Manager (The Sentinel)</strong> enforces a strict branching hierarchy:</p>
+            <div
+                style="background: rgba(var(--accent-color-rgb), 0.05); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--glass-border); margin: 1rem 0;">
+                <code
+                    style="display: block; margin-bottom: 0.5rem;"><span style="color: #64748b;"># Main Source of Truth</span><br>main</code>
+                <code
+                    style="display: block; margin-bottom: 0.5rem; padding-left: 20px;"><span style="color: #64748b;"># Sprint Integration</span><br>└── sprint/sprint-01</code>
+                <code
+                    style="display: block; padding-left: 40px;"><span style="color: #64748b;"># Feature Development</span><br>    └── feat/105-api-prototype</code>
+            </div>
+            <ul>
+                <li><strong>Main Branch:</strong> Production stable. Merged only at the end of a sprint.</li>
+                <li><strong>Sprint Branches:</strong> Active integration for all sprint features.</li>
+                <li><strong>Feature Branches:</strong> Task-specific, branching off the active sprint branch.</li>
+            </ul>
+        </section>
+
+        <footer
+            style="text-align: center; margin-top: 3rem; color: var(--text-dim); font-size: 0.8rem; border-top: 1px solid var(--glass-border); padding-top: 2rem;">
+            &copy; 2026 Bookmark Manager Team | <strong>Last Updated:</strong> 2026-02-09
+        </footer>
+    </main>
+</body>
+
+</html>
