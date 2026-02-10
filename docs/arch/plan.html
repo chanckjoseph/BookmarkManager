@@ -11,34 +11,9 @@
 
 <body>
     <nav class="sidebar">
-        <h1>Docs Hub</h1>
-        <a href="../index.html"
-            style="margin-bottom: 2rem; display: block; font-size: 0.8rem; color: var(--accent-color);">← Back to
-            Home</a>
-
-        <h3>Architecture</h3>
-        <ul>
-            <li><a href="plan.html" class="active">Implementation Plan</a></li>
-        </ul>
-
-        <h3>Team & Process</h3>
-        <ul>
-            <li><a href="../process/workflow.html">Multi-Agent Workflow</a></li>
-        </ul>
-
-        <h3>History & Sprints</h3>
-        <ul>
-            <li><a href="../sprints/sprint-01/index.html">Sprint 01: Feasibility</a></li>
-        </ul>
-
-        <h3>Source of Truth</h3>
-        <ul>
-            <li><a href="../../.brain_artifacts/implementation_plan.md">Brain: Plan (MD)</a></li>
-            <li><a href="../../.brain_artifacts/multi_agent_workflow.md">Brain: Workflow (MD)</a></li>
-            <li><a href="../../.brain_artifacts/pm_review.md">Brain: PM Review (MD)</a></li>
-            <li><a href="../../.brain_artifacts/task.md">Brain: Tasks (MD)</a></li>
-        </ul>
+        <!-- Javascript will populate this -->
     </nav>
+    <script src="../js/sidebar.js"></script>
 
     <main class="main-content">
         <header>
@@ -80,6 +55,16 @@
                         <li><strong>Search:</strong> Full-text search of titles and URLs.</li>
                         <li><strong>Folders:</strong> Hierarchical structure (optional, tags are often better for flat
                             management).</li>
+                    </ul>
+                </li>
+                <li><strong>Sync Management & Safety:</strong>
+                    <ul>
+                        <li><strong>Transactional Sync:</strong> Changes are "Pending" until approved. Zero
+                            auto-overwrites.</li>
+                        <li><strong>Version Control:</strong> Full history of every bookmark change (Undo/Rollback
+                            support).</li>
+                        <li><strong>Conflict Resolution:</strong> UI to resolve differences between Browser and Manager
+                            state.</li>
                     </ul>
                 </li>
                 <li><strong>Clean Reader View (Optional):</strong> Extract text content for reading (future feature).

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BookmarkManager - Main Dashboard (Verifiction)</title>
+    <title>BookmarkManager - Main Dashboard (Verified)</title>
     <style>
         :root {
             --accent: #38bdf8;
@@ -121,13 +121,7 @@
     <div class="grid">
         <!-- Sidebar: Tools -->
         <div class="sidebar">
-            <section class="glass-card mb">
-                <h2>1. Single Add (Bookmarklet)</h2>
-                <p style="font-size: 0.8rem; opacity: 0.7;">Drag this button to your bookmarks bar to test single-add:
-                </p>
-                <a href="javascript:(function(){const title=document.title;const url=window.location.href;fetch('http://localhost:5000/add',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title,url})}).then(r=>r.json()).then(d=>alert('Saved: '+d.received.title))})();"
-                    class="bookmarklet">BookmarkManager Add</a>
-            </section>
+            <!-- Single Add Removed from Scope -->
 
             <section class="glass-card" style="margin-top:2rem;">
                 <h2>2. Bulk Import (Detection)</h2>
@@ -145,6 +139,9 @@
 
         <!-- Main: Bookmark List -->
         <div class="main">
+            <!-- Pending Syncs Notification Area -->
+            <div id="pending-syncs-container"></div>
+
             <section class="glass-card">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <h2>Verified Bookmark List</h2>
@@ -163,6 +160,29 @@
                     </tbody>
                 </table>
             </section>
+        </div>
+    </div>
+
+    <!-- Review Modal -->
+    <div id="review-modal"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; align-items:center; justify-content:center;">
+        <div class="glass-card"
+            style="width: 80%; max-width: 800px; max-height: 80vh; display:flex; flex-direction:column; background: #0f172a;">
+            <div
+                style="display:flex; justify-content:space-between; margin-bottom:1rem; border-bottom:1px solid var(--border); padding-bottom:1rem;">
+                <h2 style="margin:0; border:none;">Review Changes</h2>
+                <button class="btn" onclick="closeModal()" style="background:transparent; color:#fff;">✕</button>
+            </div>
+
+            <div id="diff-list" style="flex:1; overflow-y:auto; margin-bottom:1rem; font-size:0.9rem;">
+                <!-- Diffs go here -->
+            </div>
+
+            <div
+                style="display:flex; justify-content:flex-end; gap:10px; border-top:1px solid var(--border); padding-top:1rem;">
+                <button class="btn" style="background:#ef4444;" onclick="rejectBatch()">Reject All</button>
+                <button class="btn" style="background:#10b981;" onclick="commitBatch()">Approve & Merge</button>
+            </div>
         </div>
     </div>
 
@@ -185,6 +205,7 @@
                         <strong>${p.browser}</strong> (${p.name})
                         <code>${p.path}</code>
                         <button class="btn" onclick="openAndGuide('${p.path}')">Open Folder & Find File</button>
+                        <button class="btn" style="background:var(--accent); color:#000; margin-left:10px;" onclick="syncFirefox('${p.path}')">Sync Directly</button>
                     `;
                     profilesList.appendChild(item);
                 });
@@ -192,6 +213,118 @@
 
             // 2. Initial List Load
             refreshList();
+            checkPendingSyncs();
+        }
+
+        async function checkPendingSyncs() {
+            try {
+                const res = await fetch(`${API_BASE}/sync/batches`);
+                const data = await res.json();
+                const container = document.getElementById('pending-syncs-container');
+                container.innerHTML = '';
+
+                if (data.batches && data.batches.length > 0) {
+                    data.batches.forEach(batch => {
+                        container.innerHTML += `
+                            <div class="glass-card" style="border: 1px solid #f59e0b; background: rgba(245, 158, 11, 0.1); margin-bottom: 2rem;">
+                                <div style="display:flex; justify-content:space-between; align-items:center;">
+                                    <div>
+                                        <h3 style="color: #f59e0b; margin-top: 0; display:flex; align-items:center; gap:8px;">
+                                            <span>⚠️</span> Pending Review: Batch #${batch.id}
+                                        </h3>
+                                        <p style="margin-bottom:0; font-size:0.9rem;">
+                                            Source: <strong>${batch.source}</strong> | Changes: <strong>${batch.count}</strong>
+                                        </p>
+                                    </div>
+                                    <button class="btn" style="background: #f59e0b; color: white;" onclick="startReview(${batch.id})">Review Changes</button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+            } catch (e) { console.error("Sync check failed", e); }
+        }
+
+        let currentBatchId = null;
+
+        async function startReview(batchId) {
+            currentBatchId = batchId;
+            const modal = document.getElementById('review-modal');
+            const list = document.getElementById('diff-list');
+            list.innerHTML = '<p>Loading changes...</p>';
+            modal.style.display = 'flex';
+
+            try {
+                const res = await fetch(`${API_BASE}/sync/batch/${batchId}`);
+                const data = await res.json();
+
+                if (data.status === 'success') {
+                    list.innerHTML = '';
+                    const changes = data.batch.changes.sort((a, b) => a.id - b.id);
+
+                    if (changes.length === 0) {
+                        list.innerHTML = '<p>No changes found.</p>';
+                        return;
+                    }
+
+                    changes.forEach(change => {
+                        const diff = change.diff; // Already parsed by API
+                        const item = document.createElement('div');
+                        item.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+                        item.style.padding = '8px 0';
+                        item.innerHTML = `
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <span style="background:#10b981; color:#000; font-size:0.7rem; padding:2px 4px; border-radius:4px;">NEW</span>
+                                <div style="flex:1;">
+                                    <div style="font-weight:bold;">${diff.title}</div>
+                                    <div style="font-size:0.8rem; opacity:0.6; word-break:break-all;">${diff.url}</div>
+                                    <div style="font-size:0.75rem; color:var(--accent); margin-top:2px;">📂 ${diff.folder}</div>
+                                </div>
+                            </div>
+                        `;
+                        list.appendChild(item);
+                    });
+                }
+            } catch (e) {
+                list.innerHTML = `<p style="color:red">Error: ${e.message}</p>`;
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('review-modal').style.display = 'none';
+        }
+
+        async function commitBatch() {
+            if (!currentBatchId) return;
+            if (!confirm("Approve and merge these changes into your main library?")) return;
+
+            try {
+                const res = await fetch(`${API_BASE}/sync/commit/${currentBatchId}`, { method: 'POST' });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    alert(data.message);
+                    closeModal();
+                    checkPendingSyncs(); // Refresh badge
+                    refreshList(); // Refresh main table
+                } else {
+                    alert("Error: " + data.message);
+                }
+            } catch (e) { alert("Commit failed: " + e); }
+        }
+
+        async function rejectBatch() {
+            if (!currentBatchId) return;
+            if (!confirm("Discard all changes in this batch? This cannot be undone.")) return;
+
+            try {
+                const res = await fetch(`${API_BASE}/sync/reject/${currentBatchId}`, { method: 'POST' });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    alert(data.message);
+                    closeModal();
+                    checkPendingSyncs();
+                }
+            } catch (e) { alert("Reject failed: " + e); }
         }
 
         async function refreshList() {
@@ -201,11 +334,22 @@
                 const tbody = document.getElementById('bookmark-table-body');
                 tbody.innerHTML = '';
                 data.data.forEach(bm => {
-                    const row = `<tr>
-                        <td><strong>${bm.title}</strong><br><span style="font-size:0.7rem; opacity:0.5">${bm.url}</span></td>
-                        <td><span class="source-badge">${bm.source}</span></td>
-                        <td style="color:#10b981">✓ Parsed</td>
-                    </tr>`;
+                    let statusHtml = '<span style="color:#10b981">✓ Synced</span>';
+                    let rowStyle = '';
+
+                    if (bm.status === 'absent_on_source') {
+                        statusHtml = '<span class="badge" style="background:#ef4444; color:#fff">⚠️ Missing in Source</span>';
+                        rowStyle = 'opacity: 0.6; background: rgba(239, 68, 68, 0.05);';
+                    }
+
+                    const row = `<tr style="${rowStyle}">
+                    <td>
+                        <strong>${bm.title}</strong>
+                        <br><span style="font-size:0.7rem; opacity:0.5">${bm.url}</span>
+                    </td>
+                    <td><span class="source-badge">${bm.source}</span></td>
+                    <td>${statusHtml}</td>
+                </tr>`;
                     tbody.innerHTML += row;
                 });
             } catch (e) { }
@@ -218,6 +362,24 @@
                 body: JSON.stringify({ path })
             });
             alert("Guidance: Finder/Explorer has been opened. Look for the 'Bookmarks' file (no extension) or 'bookmarks.html'.");
+        }
+
+        async function syncFirefox(path) {
+            if (!confirm("Start Sync from Firefox? This will create a Pending Batch for review.")) return;
+            try {
+                const res = await fetch(`${API_BASE}/sync_firefox`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ path })
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    alert(`Sync Complete! Bench #${data.batch_id} created with ${data.count} changes.`);
+                    checkPendingSyncs();
+                } else {
+                    alert("Error: " + data.message);
+                }
+            } catch (e) { alert("Sync Failed: " + e); }
         }
 
         async function uploadFile() {

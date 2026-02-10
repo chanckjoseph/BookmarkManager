@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sprint 03: Persistence - BookmarkManager</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
+</head>
+
+<body class="dashboard-body">
+    <nav class="sidebar">
+        <!-- JS Populated -->
+    </nav>
+    <script src="../../js/sidebar.js"></script>
+
+    <main class="main-content">
+        <header style="margin-bottom: 2rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h1
+                        style="font-size: 2.5rem; margin-bottom: 0.5rem; background: linear-gradient(135deg, #fff 0%, #a5f3fc 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                        Sprint 03: Persistence</h1>
+                    <p style="color: var(--text-dim);">Transitioning from Prototype to MVP Construction.</p>
+                </div>
+                <div class="status-badge status-inprogress">Active</div>
+            </div>
+        </header>
+
+        <section class="glass-card" style="margin-bottom: 2rem;">
+            <h2>The Goal: "Transactional Safety"</h2>
+            <p>In this sprint, we replace the temporary in-memory storage with a permanent database and implement strict
+                controls to prevent data loss.</p>
+        </section>
+
+        <section class="glass-card" style="margin-bottom: 2rem;">
+            <h2>Sprint Roadmap</h2>
+
+            <div style="margin-top: 1.5rem;">
+                <h3 style="color: #10b981; display: flex; align-items: center; gap: 10px;">
+                    Phase 1: Database Foundation
+                    <span class="badge" style="background: #10b981; font-size: 0.7rem;">COMPLETE</span>
+                </h3>
+                <p style="margin-left: 2rem; color: var(--text-dim);">
+                    <strong>Delivery:</strong> SQLite Database Setup (`bookmarks.db`), API Refactor.<br>
+                    <strong>Status:</strong> The app now has a permanent memory.
+                </p>
+            </div>
+
+            <div style="margin-top: 1.5rem; opacity: 1;">
+                <h3 style="color: #10b981; display: flex; align-items: center; gap: 10px;">
+                    Phase 2: Sync Logic & Review UI
+                    <span class="badge" style="background: #10b981; font-size: 0.7rem;">COMPLETE</span>
+                </h3>
+                <p style="margin-left: 2rem; color: var(--text-dim);">
+                    <strong>Delivery:</strong> The "Pending Review" Badge, Diff Viewer Modal, and "Approve/Reject"
+                    buttons.<br>
+                    <strong>Status:</strong> Sync engine is now transactional.
+                </p>
+            </div>
+
+            <div style="margin-top: 1.5rem; opacity: 1;">
+                <h3 style="color: #10b981; display: flex; align-items: center; gap: 10px;">
+                    Phase 3: Smart Sync (De-duplication)
+                    <span class="badge" style="background: #10b981; font-size: 0.7rem;">COMPLETE</span>
+                </h3>
+                <p style="margin-left: 2rem; color: var(--text-dim);">
+                    <strong>Delivery:</strong> Intelligent diff engine to prevent duplicates and detect updates.<br>
+                    <strong>Status:</strong> Verified with `test_smart_sync.py` and Manual Review.
+                </p>
+            </div>
+
+            <div style="margin-top: 1.5rem; opacity: 1;">
+                <h3 style="color: #10b981; display: flex; align-items: center; gap: 10px;">
+                    Phase 4: Verification
+                    <span class="badge" style="background: #10b981; font-size: 0.7rem;">COMPLETE</span>
+                </h3>
+                <p style="margin-left: 2rem; color: var(--text-dim);">
+                    <strong>Delivery:</strong> Regression tests and Soft Delete visual confirmation.<br>
+                    <strong>Artifact:</strong> <a href="test_report.md" style="color:var(--accent-color)">Test
+                        Report</a>
+                </p>
+            </div>
+
+            <div style="margin-top: 1.5rem; opacity: 0.5;">
+                <h3 style="color: #ef4444; display: flex; align-items: center; gap: 10px; opacity: 0.7;">
+                    <strike>Phase 5: Single Add Bookmarklet</strike>
+                    <span class="badge" style="background: #ef4444; font-size: 0.7rem;">DE-SCOPED</span>
+                </h3>
+                <p style="margin-left: 2rem; color: var(--text-dim);">
+                    <strong>Reason:</strong> Removed from scope per strategic review to focus purely on Sync.
+                </p>
+            </div>
+        </section>
+    </main>
+</body>
+
+</html>

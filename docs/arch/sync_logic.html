@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sync Logic - Bookmark Manager</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <nav class="sidebar">
+        <!-- Javascript will populate this -->
+    </nav>
+    <script src="../js/sidebar.js"></script>
+
+    <main class="main-content">
+        <header>
+            <h1>Smart Sync Logic</h1>
+            <p>Technical specification for the "Manual but Smart" synchronization engine.</p>
+        </header>
+
+        <section class="glass-card">
+            <h2>Core Philosophy</h2>
+            <p>The Bookmark Manager acts as the <strong>Static Source of Truth</strong>. Browsers (Firefox, Chrome) are
+                treated as "feeders" or external sources.</p>
+            <div
+                style="background: rgba(56, 189, 248, 0.1); border-left: 4px solid var(--accent-color); padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                <strong>Key Rule:</strong> "We don't really need delete. We can mark as deleted, and the user can delete
+                on our app manually if they really don't need it."
+            </div>
+            <p style="margin-top: 1rem;">This means the sync engine ensures <strong>Data Safety</strong> above all else.
+                It never automatically removes data from your library based on external state changes.</p>
+        </section>
+
+        <section class="glass-card">
+            <h2>The Sync Algorithm</h2>
+            <p>When you trigger a sync (e.g., "Pull from Firefox"), the system performs a differential analysis:</p>
+
+            <h3>1. Matching Logic</h3>
+            <p>Bookmarks are identified principally by their <strong>Normalized URL</strong>.</p>
+            <ul>
+                <li><strong>Normalization:</strong> Strips trailing slashes.</li>
+                <li><strong>Exact Match:</strong> <code>http://google.com</code> and <code>https://google.com</code> are
+                    currently treated as distinctive (MVP), but this may evolve.</li>
+            </ul>
+
+            <h3>2. Handling Incoming Items</h3>
+            <table style="width:100%; border-collapse: collapse; margin-top: 1rem;">
+                <thead>
+                    <tr style="border-bottom: 2px solid rgba(255,255,255,0.1); text-align: left;">
+                        <th style="padding: 10px;">Scenario</th>
+                        <th style="padding: 10px;">Action</th>
+                        <th style="padding: 10px;">Outcome</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <td style="padding: 10px;"><strong>URL Not Found</strong><br><span
+                                style="font-size: 0.8rem; opacity: 0.6;">(New Bookmark)</span></td>
+                        <td style="padding: 10px;"><span class="badge" style="background:#10b981; color:#000;">CREATE
+                                NEW</span></td>
+                        <td style="padding: 10px;">Added to "Pending Review".<br>Commits as a new row.</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <td style="padding: 10px;"><strong>URL Found + Match</strong><br><span
+                                style="font-size: 0.8rem; opacity: 0.6;">(Existing, Unchanged)</span></td>
+                        <td style="padding: 10px;"><span class="badge" style="background:#64748b;">IGNORE</span></td>
+                        <td style="padding: 10px;">No action taken.</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <td style="padding: 10px;"><strong>URL Found + Differs</strong><br><span
+                                style="font-size: 0.8rem; opacity: 0.6;">(Title/Folder Changed)</span></td>
+                        <td style="padding: 10px;"><span class="badge"
+                                style="background:#f59e0b; color:#000;">UPDATE</span></td>
+                        <td style="padding: 10px;">Added to "Pending Review".<br>Updates metadata only.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>3. Handling Missing Items (The "Soft Delete")</h3>
+            <p>If a bookmark exists in your library (sourced from Firefox) but is <strong>missing</strong> from the new
+                Firefox sync:</p>
+            <ul>
+                <li><strong>Action:</strong> <span class="badge" style="background:#ef4444;">FLAG (SOFT DELETE)</span>
+                </li>
+                <li><strong>Outcome:</strong>
+                    <ul>
+                        <li>The item is <strong>NOT</strong> deleted from the database.</li>
+                        <li>Its status is set to <code>absent_on_source</code>.</li>
+                        <li>It is visually dimmed or flagged in the UI.</li>
+                        <li>You must explicitly click "Delete" in the App to remove it.</li>
+                    </ul>
+                </li>
+            </ul>
+        </section>
+
+        <section class="glass-card">
+            <h2>Data States</h2>
+            <ul>
+                <li><code>synced</code>: Exists in both App and Browser.</li>
+                <li><code>absent_on_source</code>: Exists in App, but was deleted from Browser (Soft Deleted).</li>
+                <li><code>manual</code>: Added manually or via file import. Ignored by Browser Sync.</li>
+            </ul>
+        </section>
+
+        <footer
+            style="text-align: center; margin-top: 3rem; color: var(--text-dim); font-size: 0.8rem; border-top: 1px solid var(--glass-border); padding-top: 2rem;">
+            &copy; 2026 Bookmark Manager Team | <strong>Last Updated:</strong> 2026-02-09
+        </footer>
+    </main>
+</body>
+
+</html>
