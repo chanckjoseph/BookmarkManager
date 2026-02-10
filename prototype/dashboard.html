@@ -114,6 +114,37 @@
             margin: 1rem 0;
             box-shadow: 0 4px 15px rgba(56, 189, 248, 0.4);
         }
+
+        .search-container {
+            flex: 1;
+            margin: 0 2rem;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border);
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-family: inherit;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .search-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        .highlight {
+            background: rgba(56, 189, 248, 0.3);
+            color: #fff;
+            border-radius: 2px;
+            padding: 0 2px;
+        }
     </style>
 </head>
 
@@ -143,8 +174,14 @@
             <div id="pending-syncs-container"></div>
 
             <section class="glass-card">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <h2>Verified Bookmark List</h2>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h2 style="border:none; margin:0;">Verified List</h2>
+
+                    <div class="search-container">
+                        <input type="text" class="search-input" id="search-input" placeholder="Search titles or URLs..."
+                            oninput="handleSearch(this.value)">
+                    </div>
+
                     <button class="btn" onclick="refreshList()">Refresh</button>
                 </div>
                 <table>
@@ -327,12 +364,23 @@
             } catch (e) { alert("Reject failed: " + e); }
         }
 
-        async function refreshList() {
+        let searchDebounce;
+
+        function handleSearch(query) {
+            clearTimeout(searchDebounce);
+            searchDebounce = setTimeout(() => {
+                refreshList(query);
+            }, 300);
+        }
+
+        async function refreshList(query = "") {
             try {
-                const res = await fetch(`${API_BASE}/bookmarks`);
+                const url = query ? `${API_BASE}/bookmarks?q=${encodeURIComponent(query)}` : `${API_BASE}/bookmarks`;
+                const res = await fetch(url);
                 const data = await res.json();
                 const tbody = document.getElementById('bookmark-table-body');
                 tbody.innerHTML = '';
+
                 data.data.forEach(bm => {
                     let statusHtml = '<span style="color:#10b981">✓ Synced</span>';
                     let rowStyle = '';
@@ -342,17 +390,27 @@
                         rowStyle = 'opacity: 0.6; background: rgba(239, 68, 68, 0.05);';
                     }
 
+                    // Highlighting Logic
+                    let displayTitle = bm.title || "No Title";
+                    let displayUrl = bm.url;
+
+                    if (query) {
+                        const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+                        displayTitle = displayTitle.replace(regex, '<span class="highlight">$1</span>');
+                        displayUrl = displayUrl.replace(regex, '<span class="highlight">$1</span>');
+                    }
+
                     const row = `<tr style="${rowStyle}">
                     <td>
-                        <strong>${bm.title}</strong>
-                        <br><span style="font-size:0.7rem; opacity:0.5">${bm.url}</span>
+                        <strong>${displayTitle}</strong>
+                        <br><span style="font-size:0.7rem; opacity:0.5">${displayUrl}</span>
                     </td>
                     <td><span class="source-badge">${bm.source}</span></td>
                     <td>${statusHtml}</td>
                 </tr>`;
                     tbody.innerHTML += row;
                 });
-            } catch (e) { }
+            } catch (e) { console.error("Load failed", e); }
         }
 
         async function openAndGuide(path) {
