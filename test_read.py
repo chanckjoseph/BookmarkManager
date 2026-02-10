@@ -3,7 +3,7 @@ import os
 sys.path.append(os.path.join(os.getcwd(), 'prototype'))
 from firefox_reader import get_firefox_bookmarks
 
-db_path = "/home/joseph/.mozilla/firefox/xjlph276.default-release-1761459509703/places.sqlite"
+db_path = os.environ.get('FIREFOX_PROFILE_PATH', './empty_chrome_profile/places.sqlite')
 
 try:
     print(f"Reading {db_path}...")

@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tools - Bookmark Manager</title>
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;600&display=swap">
+    <style>
+        :root {
+            --bg: #0b0f1a;
+            --glass: rgba(30, 41, 59, 0.4);
+            --border: rgba(255, 255, 255, 0.08);
+            --accent: #38bdf8;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: #f8fafc;
+            display: flex;
+            height: 100vh;
+        }
+
+        .global-nav {
+            width: 70px;
+            background: #0f172a;
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 2rem;
+            gap: 2rem;
+        }
+
+        .nav-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 1.2rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .nav-icon:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+        }
+
+        .nav-icon.active {
+            background: rgba(56, 189, 248, 0.1);
+            color: var(--accent);
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 3rem;
+            overflow-y: auto;
+        }
+
+        .glass-card {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .btn {
+            background: var(--accent);
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="global-nav">
+        <a href="/dashboard" class="nav-icon" title="Dashboard">🏠</a>
+        <a href="/tools" class="nav-icon active" title="Tools">🛠️</a>
+        <a href="/history" class="nav-icon" title="History">📜</a>
+    </nav>
+    <main class="main-content">
+        <h1>Bookmark Tools</h1>
+
+        <section class="glass-card">
+            <h2>1. Profile Detection</h2>
+            <div id="env-status" style="margin-bottom:1rem; opacity:0.7;">Detecting environment...</div>
+            <div id="profiles-list"
+                style="display:grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap:1rem;"></div>
+        </section>
+
+        <section class="glass-card">
+            <h2>2. Bulk Import</h2>
+            <p style="opacity:0.6; font-size:0.9rem;">Upload your browser bookmarks file (exported as HTML or JSON).</p>
+            <div style="display:flex; gap:10px; align-items:center;">
+                <input type="file" id="file-input"
+                    style="background: rgba(255,255,255,0.05); padding: 8px; border-radius: 8px;">
+                <button class="btn" onclick="uploadFile()">Upload & Parse</button>
+            </div>
+        </section>
+
+        <section class="glass-card">
+            <h2>3. Pending Reviews</h2>
+            <div id="pending-syncs-container">
+                <p style="opacity:0.5;">Checking for pending changes...</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Review Modal -->
+    <div id="review-modal"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; align-items:center; justify-content:center;">
+        <div class="glass-card"
+            style="width: 80%; max-width: 800px; max-height: 80vh; display:flex; flex-direction:column; background: #0f172a;">
+            <div
+                style="display:flex; justify-content:space-between; margin-bottom:1rem; border-bottom:1px solid var(--border); padding-bottom:1rem;">
+                <h2 style="margin:0; border:none;">Review Changes</h2>
+                <button class="btn" onclick="closeModal()" style="background:transparent; color:#fff;">✕</button>
+            </div>
+            <div id="diff-list" style="flex:1; overflow-y:auto; margin-bottom:1rem; font-size:0.9rem;"></div>
+            <div
+                style="display:flex; justify-content:flex-end; gap:10px; border-top:1px solid var(--border); padding-top:1rem;">
+                <button class="btn" style="background:#ef4444; color:white;" onclick="rejectBatch()">Reject All</button>
+                <button class="btn" style="background:#10b981; color:white;" onclick="commitBatch()">Approve &
+                    Merge</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '{{ API_BASE_URL }}';
+
+        async function init() {
+            try {
+                const res = await fetch(`${API_BASE}/env`);
+                const data = await res.json();
+                const status = document.getElementById('env-status');
+                const list = document.getElementById('profiles-list');
+
+                status.innerText = `OS: ${data.env.os} | Browsers Detected: ${data.env.profiles.length}`;
+
+                list.innerHTML = data.env.profiles.map(p => `
+                    <div class="glass-card" style="margin:0; padding:1.2rem; border-color: rgba(56, 189, 248, 0.2);">
+                        <div style="font-weight:bold; margin-bottom:0.5rem; display:flex; justify-content:space-between;">
+                            <span>${p.browser} (${p.name})</span>
+                            <span style="font-size:0.7rem; padding:2px 6px; background:#1e293b; border-radius:4px;">${p.source}</span>
+                        </div>
+                        <div style="font-size:0.75rem; opacity:0.6; margin-bottom:1rem; word-break:break-all;">${p.path}</div>
+                        <div style="display:flex; gap:8px;">
+                            ${p.browser === 'Firefox' ?
+                        `<button class="btn" style="font-size:0.7rem; padding:6px 10px;" onclick="syncFirefox('${p.path}')">Sync</button>` :
+                        `<button class="btn" style="font-size:0.7rem; padding:6px 10px;" onclick="syncChrome('${p.path}')">Sync</button>`}
+                            <button class="btn" style="font-size:0.7rem; padding:6px 10px; background:rgba(255,255,255,0.05); color:#fff;" onclick="openAndGuide('${p.path}')">Manual</button>
+                        </div>
+                    </div>
+                `).join('');
+
+                checkPendingSyncs();
+            } catch (e) {
+                document.getElementById('env-status').innerText = "Backend Offline. Start 'python api.py'";
+            }
+        }
+
+        async function checkPendingSyncs() {
+            try {
+                const res = await fetch(`${API_BASE}/sync/batches`);
+                const data = await res.json();
+                const container = document.getElementById('pending-syncs-container');
+                container.innerHTML = '';
+
+                if (data.batches && data.batches.length > 0) {
+                    data.batches.forEach(batch => {
+                        container.innerHTML += `
+                            <div class="glass-card" style="border: 1px solid #f59e0b; background: rgba(245, 158, 11, 0.05); margin-bottom: 1rem; display:flex; justify-content:space-between; align-items:center;">
+                                <div>
+                                    <h3 style="color: #f59e0b; margin: 0; font-size:1rem;">⚠️ Batch #${batch.id} (${batch.source})</h3>
+                                    <p style="margin:4px 0 0 0; font-size:0.8rem; opacity:0.7;">${batch.count} changes pending review.</p>
+                                </div>
+                                <button class="btn" style="background: #f59e0b; color: white;" onclick="startReview(${batch.id})">Review & Merge</button>
+                            </div>
+                        `;
+                    });
+                } else {
+                    container.innerHTML = '<p style="opacity:0.5; font-size:0.9rem;">No batches waiting for review.</p>';
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        let currentBatchId = null;
+
+        let currentBatchChanges = [];
+
+        async function startReview(batchId) {
+            currentBatchId = batchId;
+            const modal = document.getElementById('review-modal');
+            const list = document.getElementById('diff-list');
+            list.innerHTML = '<p>Loading changes...</p>';
+            modal.style.display = 'flex';
+
+            try {
+                const res = await fetch(`${API_BASE}/sync/batch/${batchId}`);
+                const data = await res.json();
+
+                if (data.status === 'success') {
+                    list.innerHTML = `
+                        <div style="padding: 10px 0; border-bottom: 1px solid var(--border); margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
+                            <input type="checkbox" id="select-all-checkbox" onchange="toggleSelectAll(this)" checked>
+                            <label for="select-all-checkbox" style="font-weight: 600; cursor: pointer;">Select All</label>
+                        </div>
+                    `;
+                    currentBatchChanges = data.batch.changes.sort((a, b) => a.id - b.id);
+
+                    if (currentBatchChanges.length === 0) {
+                        list.innerHTML = '<p>No changes found.</p>';
+                        return;
+                    }
+
+                    currentBatchChanges.forEach(change => {
+                        const diff = change.diff;
+                        const item = document.createElement('div');
+                        item.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+                        item.style.padding = '12px 0';
+                        item.style.display = 'flex';
+                        item.style.alignItems = 'center';
+                        item.style.gap = '15px';
+
+                        const typeBadge = change.type === 'new' ?
+                            '<span style="background:#10b981; color:#000; font-size:0.6rem; padding:2px 6px; border-radius:4px; font-weight:700;">NEW</span>' :
+                            '<span style="background:#3b82f6; color:#fff; font-size:0.6rem; padding:2px 6px; border-radius:4px; font-weight:700;">MOD</span>';
+
+                        item.innerHTML = `
+                            <input type="checkbox" class="change-checkbox" value="${change.id}" checked>
+                            <div style="flex:1;">
+                                <div style="display:flex; align-items:center; gap:8px;">
+                                    ${typeBadge}
+                                    <div style="font-weight:600;">${diff.title}</div>
+                                </div>
+                                <div style="font-size:0.75rem; opacity:0.5; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:600px;">${diff.url}</div>
+                                <div style="font-size:0.7rem; opacity:0.4; margin-top:4px;">Folder: ${diff.folder || 'Root'}</div>
+                            </div>
+                        `;
+                        list.appendChild(item);
+                    });
+                }
+            } catch (e) { list.innerHTML = '<p>Failed to load batch detail.</p>'; }
+        }
+
+        function toggleSelectAll(checkbox) {
+            document.querySelectorAll('.change-checkbox').forEach(cb => cb.checked = checkbox.checked);
+        }
+
+        async function commitBatch() {
+            if (!currentBatchId) return;
+
+            const selectedCheckboxes = document.querySelectorAll('.change-checkbox:checked');
+            const selectedIds = Array.from(selectedCheckboxes).map(cb => parseInt(cb.value));
+
+            if (selectedIds.length === 0) {
+                return alert("Please select at least one change to approve.");
+            }
+
+            const confirmMsg = selectedIds.length === currentBatchChanges.length ?
+                "Approve and merge all selected changes?" :
+                `Approve and merge ${selectedIds.length} selected changes? (The rest will remain pending)`;
+
+            if (!confirm(confirmMsg)) return;
+
+            try {
+                const res = await fetch(`${API_BASE}/sync/commit/${currentBatchId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ change_ids: selectedIds })
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    alert(`Merged ${data.count} changes successfully.`);
+                    if (data.remaining > 0) {
+                        startReview(currentBatchId); // Refresh modal with remaining
+                    } else {
+                        document.getElementById('review-modal').style.display = 'none';
+                    }
+                    checkPendingSyncs();
+                } else { alert("Merge failed: " + data.message); }
+            } catch (e) { alert("Error: " + e); }
+        }
+
+        function closeModal() { document.getElementById('review-modal').style.display = 'none'; }
+
+        async function rejectBatch() {
+            if (!currentBatchId || !confirm("Reject all changes in this batch?")) return;
+            const res = await fetch(`${API_BASE}/sync/reject/${currentBatchId}`, { method: 'POST' });
+            if (res.ok) {
+                closeModal();
+                checkPendingSyncs();
+            }
+        }
+
+        async function uploadFile() {
+            const input = document.getElementById('file-input');
+            if (!input.files[0]) return alert("Select a file first");
+            const formData = new FormData();
+            formData.append('file', input.files[0]);
+            const res = await fetch(`${API_BASE}/upload_bulk`, { method: 'POST', body: formData });
+            const data = await res.json();
+            alert(`Parsed ${data.count} items!`);
+            location.href = 'dashboard.html';
+        }
+
+        async function syncFirefox(path) {
+            const res = await fetch(`${API_BASE}/sync_firefox`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ path }) });
+            const data = await res.json();
+            if (data.status === 'success') { alert("Sync Batch Created!"); checkPendingSyncs(); }
+        }
+
+        async function syncChrome(path) {
+            const res = await fetch(`${API_BASE}/sync_chrome`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ path }) });
+            const data = await res.json();
+            if (data.status === 'success') { alert("Sync Batch Created!"); checkPendingSyncs(); }
+        }
+
+        async function openAndGuide(path) {
+            await fetch(`${API_BASE}/open_folder`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ path }) });
+            alert("Folder opened.");
+        }
+
+        init();
+    </script>
+</body>
+
+</html>

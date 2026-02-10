@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sprint 05: UX Excellence & Performance - BookmarkManager</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
+</head>
+
+<body class="dashboard-body">
+    <nav class="sidebar">
+        <!-- JS Populated -->
+    </nav>
+    <script src="../../js/sidebar.js"></script>
+
+    <main class="main-content">
+        <header>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h1 class="text-gradient">Sprint 05: UX Excellence & Performance</h1>
+                    <p>Elevating the user experience with fluid interactions and optimized speed.</p>
+                </div>
+                <div class="badge badge-planning">PLANNING</div>
+            </div>
+        </header>
+
+        <section class="glass-card">
+            <h2>The Goal: "Polish & Scale"</h2>
+            <p>This sprint focuses on transitioning from a functional prototype to a premium application. Key priorities
+                include visual refinements, micro-animations, and backend performance optimizations like pagination and
+                fuzzy search.</p>
+        </section>
+
+        <section class="glass-card">
+            <h2>Sprint Roadmap</h2>
+
+            <div style="margin-top: 1.5rem;">
+                <h3 style="color: #38bdf8; display: flex; align-items: center; gap: 10px;">
+                    Phase 1: Visual Identity & Transitions
+                    <span class="badge badge-planning" style="font-size: 0.7rem;">IN PROGRESS</span>
+                </h3>
+                <p style="margin-left: 2rem;">
+                    Refining the glassmorphic design system and implementing CSS transitions for a seamless, "app-like"
+                    feel during navigation and search.
+                </p>
+            </div>
+
+            <div style="margin-top: 1.5rem;">
+                <h3 style="color: #64748b; display: flex; align-items: center; gap: 10px;">
+                    Phase 2: API Performance (Pagination)
+                    <span class="badge badge-backlog" style="font-size: 0.7rem;">BACKLOG</span>
+                </h3>
+                <p style="margin-left: 2rem;">
+                    Scaling the backend to handle large bookmark collections by implementing limit/offset pagination in
+                    the `/bookmarks` API.
+                </p>
+            </div>
+
+            <div style="margin-top: 1.5rem;">
+                <h3 style="color: #64748b; display: flex; align-items: center; gap: 10px;">
+                    Phase 3: Advanced Retrieval (Fuzzy Search)
+                    <span class="badge badge-backlog" style="font-size: 0.7rem;">BACKLOG</span>
+                </h3>
+                <p style="margin-left: 2rem;">
+                    Implementing multi-term and partial matching logic to help users find bookmarks more intuitively.
+                </p>
+            </div>
+
+            <div style="margin-top: 1.5rem;">
+                <h3 style="color: #64748b; display: flex; align-items: center; gap: 10px;">
+                    Phase 4: Environment Formalization
+                    <span class="badge badge-backlog" style="font-size: 0.7rem;">BACKLOG</span>
+                </h3>
+                <p style="margin-left: 2rem;">
+                    Standardizing dev/test/prod configurations using `.env` files and environment variables.
+                </p>
+            </div>
+        </section>
+    </main>
+</body>
+
+</html>

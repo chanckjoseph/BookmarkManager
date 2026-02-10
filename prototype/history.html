@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>History - Bookmark Manager</title>
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;600&display=swap">
+    <style>
+        :root {
+            --bg: #0b0f1a;
+            --glass: rgba(30, 41, 59, 0.4);
+            --border: rgba(255, 255, 255, 0.08);
+            --accent: #38bdf8;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: #f8fafc;
+            display: flex;
+            height: 100vh;
+        }
+
+        .global-nav {
+            width: 70px;
+            background: #0f172a;
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 2rem;
+            gap: 2rem;
+        }
+
+        .nav-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 1.2rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .nav-icon:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+        }
+
+        .nav-icon.active {
+            background: rgba(56, 189, 248, 0.1);
+            color: var(--accent);
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 3rem;
+            overflow-y: auto;
+        }
+
+        .glass-card {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .timeline-item {
+            border-left: 2px solid var(--border);
+            padding-left: 1.5rem;
+            padding-bottom: 2rem;
+            position: relative;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -7px;
+            top: 0;
+            width: 12px;
+            height: 12px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="global-nav">
+        <a href="/dashboard" class="nav-icon" title="Dashboard">🏠</a>
+        <a href="/tools" class="nav-icon" title="Tools">🛠️</a>
+        <a href="/history" class="nav-icon active" title="History">📜</a>
+    </nav>
+    <main class="main-content">
+        <h1>Audit History</h1>
+        <p style="opacity:0.6; margin-bottom:2rem;">Global log of all bookmark versions and reverts.</p>
+
+        <div id="history-feed" style="max-width: 800px;">
+            <p style="opacity:0.5;">Loading history...</p>
+        </div>
+    </main>
+
+    <style>
+        .history-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            display: flex;
+            gap: 1.5rem;
+            transition: all 0.2s;
+        }
+
+        .history-card:hover {
+            border-color: rgba(56, 189, 248, 0.3);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .version-badge {
+            background: rgba(56, 189, 248, 0.1);
+            color: var(--accent);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            height: fit-content;
+        }
+
+        .timestamp {
+            font-size: 0.75rem;
+            opacity: 0.5;
+            margin-top: 0.5rem;
+        }
+    </style>
+
+    <script>
+        const API_BASE = '{{ API_BASE_URL }}';
+
+        async function init() {
+            try {
+                const res = await fetch(`${API_BASE}/history`);
+                const data = await res.json();
+                const feed = document.getElementById('history-feed');
+                feed.innerHTML = '';
+
+                if (data.history.length === 0) {
+                    feed.innerHTML = '<div class="glass-card">No history recorded yet. Updates and Reverts will appear here.</div>';
+                    return;
+                }
+
+                data.history.forEach(h => {
+                    const date = new Date(h.created_at).toLocaleString();
+                    feed.innerHTML += `
+                        <div class="history-card">
+                            <span class="version-badge">v${h.version}</span>
+                            <div style="flex:1;">
+                                <div style="font-weight:600; font-size:1.1rem; margin-bottom:0.2rem;">${h.title || 'Untitled'}</div>
+                                <div style="font-size:0.8rem; opacity:0.6; word-break:break-all;">${h.url}</div>
+                                <div style="font-size:0.8rem; margin-top:0.5rem;">
+                                    <span style="opacity:0.5;">Folder:</span> ${h.folder || 'Root'}
+                                </div>
+                                <div class="timestamp">Recorded on ${date}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+            } catch (e) {
+                document.getElementById('history-feed').innerText = "Failed to load audit feed.";
+            }
+        }
+
+        init();
+    </script>
+</body>
+
+</html>

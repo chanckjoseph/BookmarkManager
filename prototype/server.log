@@ -1,0 +1,29 @@
+nohup: ignoring input
+ * Serving Flask app 'api'
+ * Debug mode: off
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.84:5000
+[33mPress CTRL+C to quit[0m
+127.0.0.1 - - [10/Feb/2026 12:00:52] "HEAD /tools HTTP/1.1" 200 -
+127.0.0.1 - - [10/Feb/2026 12:02:08] "HEAD /history HTTP/1.1" 200 -
+127.0.0.1 - - [10/Feb/2026 12:02:08] "HEAD /dashboard HTTP/1.1" 200 -
+127.0.0.1 - - [10/Feb/2026 12:03:11] "GET /dashboard HTTP/1.1" 200 -
+127.0.0.1 - - [10/Feb/2026 12:03:11] "GET /bookmarks HTTP/1.1" 200 -
+127.0.0.1 - - [10/Feb/2026 12:03:45] "GET /dashboard HTTP/1.1" 200 -
+127.0.0.1 - - [10/Feb/2026 12:03:45] "GET /bookmarks HTTP/1.1" 200 -
+127.0.0.1 - - [10/Feb/2026 12:03:48] "GET /tools HTTP/1.1" 200 -
+127.0.0.1 - - [10/Feb/2026 12:03:48] "GET /env HTTP/1.1" 200 -
+127.0.0.1 - - [10/Feb/2026 12:03:48] "GET /sync/batches HTTP/1.1" 200 -
+127.0.0.1 - - [10/Feb/2026 12:03:52] "GET /dashboard HTTP/1.1" 200 -
+127.0.0.1 - - [10/Feb/2026 12:03:52] "GET /bookmarks HTTP/1.1" 200 -
+127.0.0.1 - - [10/Feb/2026 13:07:04] "POST /sync_firefox HTTP/1.1" 200 -
+127.0.0.1 - - [10/Feb/2026 13:07:04] "GET /sync/batch/3 HTTP/1.1" 200 -
+/home/joseph/Desktop/Antigravity/Bookmark Manager/prototype/api.py:330: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  batch.completed_at = datetime.utcnow()
+127.0.0.1 - - [10/Feb/2026 13:07:04] "POST /sync/commit/3 HTTP/1.1" 200 -
+127.0.0.1 - - [10/Feb/2026 13:12:37] "[35m[1mPOST /sync_firefox HTTP/1.1[0m" 500 -
+127.0.0.1 - - [10/Feb/2026 13:12:37] "[35m[1mPOST /sync_firefox HTTP/1.1[0m" 500 -
+127.0.0.1 - - [10/Feb/2026 13:30:03] "GET /dashboard HTTP/1.1" 200 -
+127.0.0.1 - - [10/Feb/2026 13:30:03] "GET /bookmarks HTTP/1.1" 200 -

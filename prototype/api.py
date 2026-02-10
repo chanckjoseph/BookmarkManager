@@ -7,26 +7,21 @@ from datetime import datetime
 from parser import parse_netscape_bookmarks
 from chrome_parser import parse_chrome_bookmarks
 from env_scan_v2 import get_browser_profiles
-from database import db, Bookmark, SyncBatch, PendingChange, Tag
+from database import db, Bookmark, SyncBatch, PendingChange, Tag, BookmarkHistory
 
 # ... (Previous code)
 
 
+from config import Config
+
 app = Flask(__name__, template_folder='.')
-# Database Configuration
-if os.environ.get('FLASK_ENV') == 'testing':
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
-else:
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///bookmarks.db'
-    
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {'connect_args': {'timeout': 30}}
+app.config.from_object(Config)
 
 from database import db
 db.init_app(app)
 
 with app.app_context():
-    if os.environ.get('FLASK_ENV') != 'testing':
+    if app.config['FLASK_ENV'] != 'testing':
         db.create_all()
 
 CORS(app)
@@ -40,11 +35,29 @@ def dashboard():
 def onboarding():
     return render_template('index.html')
 
-# In-memory "Database" for the prototype verification
-# This ensures Stage 4 "Main App Page" can actually show combined data.
+@app.route('/tools')
+def tools():
+    return render_template('tools.html')
+
+@app.route('/history')
+def history():
+    return render_template('history.html')
+
+# ... (Previous code)
 BOOKMARKS_DB = [
-    {"title": "Documentation Hub", "url": "http://localhost:8080/docs/", "source": "System"}
+    {"title": "Documentation Hub", "url": "/docs/", "source": "System"}
 ]
+
+def save_history(bookmark):
+    """Saves a snapshot of the current bookmark state to history."""
+    history = BookmarkHistory(
+        bookmark_id=bookmark.id,
+        version=bookmark.version,
+        url=bookmark.url,
+        title=bookmark.title,
+        folder_path=bookmark.folder_path
+    )
+    db.session.add(history)
 
 @app.route('/sync_firefox', methods=['POST'])
 def sync_firefox():
@@ -251,14 +264,24 @@ def get_batch_details(batch_id):
 
 @app.route('/sync/commit/<int:batch_id>', methods=['POST'])
 def commit_batch(batch_id):
-    """Applies all changes in a batch to the main bookmarks table."""
+    """Applies selected or all changes in a batch to the main bookmarks table."""
     try:
         batch = SyncBatch.query.get_or_404(batch_id)
         if batch.status != 'pending_review':
             return jsonify({"status": "error", "message": "Batch already processed"}), 400
             
+        # Get specific IDs to commit, or commit all if None
+        data_json = request.json if request.is_json else {}
+        ids_to_commit = data_json.get('change_ids')
+        
         count = 0
+        changes_to_process = []
+        
         for change in batch.changes:
+            if ids_to_commit is None or change.id in ids_to_commit:
+                changes_to_process.append(change)
+
+        for change in changes_to_process:
             data = change.get_diff()
             
             if change.change_type == 'new':
@@ -275,21 +298,34 @@ def commit_batch(batch_id):
             elif change.change_type == 'update':
                 bm = Bookmark.query.get(change.bookmark_id)
                 if bm:
+                    # Save current state to history before updating
+                    save_history(bm)
+                    
                     new_data = data.get('new', {})
                     bm.title = new_data.get('title')
                     bm.folder_path = new_data.get('folder')
+                    bm.version += 1 # Increment version
                     bm.last_synced_at = datetime.utcnow()
                     count += 1
                     
             elif change.change_type == 'mark_deleted':
                 bm = Bookmark.query.get(change.bookmark_id)
                 if bm:
-                    bm.status = 'absent_on_source'
+                    save_history(bm)
+                    db.session.delete(bm)
                     count += 1
             
-        batch.status = 'approved'
+            # Remove the change from the batch after processing
+            db.session.delete(change)
+        
+        # If all changes are gone, mark batch as committed
+        db.session.flush() # Ensure deletes are registered
+        if len(batch.changes) == 0:
+            batch.status = 'committed'
+            batch.completed_at = datetime.utcnow()
+            
         db.session.commit()
-        return jsonify({"status": "success", "message": f"Committed {count} bookmarks."})
+        return jsonify({"status": "success", "count": count, "remaining": len(batch.changes)})
         
     except Exception as e:
         db.session.rollback()
@@ -308,19 +344,22 @@ def reject_batch(batch_id):
 
 @app.route('/bookmarks', methods=['GET'])
 def get_bookmarks():
-    """Returns the current state of the database, optionally filtered by search query."""
-    query = request.args.get('q')
+    """Returns the current state of the database with eager-loaded tags."""
+    from sqlalchemy.orm import joinedload
+    query_term = request.args.get('q')
     
-    if query:
-        search_term = f"%{query}%"
-        bookmarks = Bookmark.query.filter(
+    base_query = Bookmark.query.options(joinedload(Bookmark.tags)).order_by(Bookmark.id.desc())
+
+    if query_term:
+        search_term = f"%{query_term}%"
+        bookmarks = base_query.filter(
             (Bookmark.title.ilike(search_term)) | 
             (Bookmark.url.ilike(search_term))
-        ).order_by(Bookmark.id.desc()).all()
+        ).all()
     else:
-        bookmarks = Bookmark.query.order_by(Bookmark.id.desc()).all()
+        bookmarks = base_query.all()
         
-    return jsonify({"status": "success", "data": [b.to_dict() for b in bookmarks]})
+    return jsonify({"status": "success", "bookmarks": [b.to_dict() for b in bookmarks]})
 
 @app.route('/upload_bulk', methods=['POST'])
 def upload_bulk():
@@ -343,9 +382,16 @@ def upload_bulk():
         new_data = parse_chrome_bookmarks(temp_path)
     
     for bm in new_data:
-        bm['source'] = f"Upload: {filename}"
-        BOOKMARKS_DB.append(bm)
+        new_bm = Bookmark(
+            url=bm.get('url'),
+            title=bm.get('title'),
+            folder_path=bm.get('folder', ''),
+            source_browser=f"Upload: {filename}",
+            status='synced'
+        )
+        db.session.add(new_bm)
         
+    db.session.commit()
     return jsonify({"status": "success", "count": len(new_data)})
 
 @app.route('/env', methods=['GET'])
@@ -426,5 +472,54 @@ def remove_tag_from_bookmark(bookmark_id, tag_id):
         
     return jsonify({"status": "success", "data": bookmark.to_dict()})
 
+@app.route('/history', methods=['GET'])
+def get_all_history():
+    """Returns a global feed of recent bookmark changes."""
+    history = BookmarkHistory.query.order_by(BookmarkHistory.created_at.desc()).limit(100).all()
+    return jsonify({
+        "status": "success",
+        "history": [h.to_dict() for h in history]
+    })
+
+@app.route('/bookmarks/<int:bookmark_id>/history', methods=['GET'])
+def get_bookmark_history(bookmark_id):
+    """Returns the version history of a bookmark."""
+    bookmark = Bookmark.query.get_or_404(bookmark_id)
+    history = BookmarkHistory.query.filter_by(bookmark_id=bookmark_id).order_by(BookmarkHistory.version.desc()).all()
+    
+    # Return both current version and history
+    return jsonify({
+        "status": "success",
+        "current": bookmark.to_dict(),
+        "history": [h.to_dict() for h in history]
+    })
+
+@app.route('/bookmarks/<int:bookmark_id>/revert/<int:history_id>', methods=['POST'])
+def revert_bookmark(bookmark_id, history_id):
+    """Reverts a bookmark to a previous version."""
+    bookmark = Bookmark.query.get_or_404(bookmark_id)
+    history = BookmarkHistory.query.get_or_404(history_id)
+    
+    if history.bookmark_id != bookmark_id:
+        return jsonify({"status": "error", "message": "History record mismatch"}), 400
+        
+    # Save current state before revert
+    save_history(bookmark)
+    
+    # Apply historical state
+    bookmark.title = history.title
+    bookmark.url = history.url
+    bookmark.folder_path = history.folder_path
+    bookmark.version += 1
+    bookmark.last_synced_at = datetime.utcnow()
+    
+    db.session.commit()
+    return jsonify({"status": "success", "message": f"Reverted to version {history.version}"})
+
+@app.context_processor
+def inject_config():
+    """Injects config values into all templates."""
+    return dict(API_BASE_URL=app.config.get('API_BASE_URL', ''))
+
 if __name__ == '__main__':
-    app.run(port=5000)
+    app.run(host=app.config['HOST'], port=app.config['PORT'], debug=app.config['DEBUG'])

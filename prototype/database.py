@@ -83,3 +83,30 @@ class PendingChange(db.Model):
 
     def get_diff(self):
         return json.loads(self.diff_blob) if self.diff_blob else {}
+class BookmarkHistory(db.Model):
+    """Stores historical versions of bookmarks."""
+    __tablename__ = 'bookmark_history'
+
+    id = db.Column(db.Integer, primary_key=True)
+    bookmark_id = db.Column(db.Integer, db.ForeignKey('bookmarks.id'), nullable=False)
+    version = db.Column(db.Integer, nullable=False)
+    
+    url = db.Column(db.String, nullable=False)
+    title = db.Column(db.String)
+    folder_path = db.Column(db.String)
+    
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "bookmark_id": self.bookmark_id,
+            "version": self.version,
+            "url": self.url,
+            "title": self.title,
+            "folder": self.folder_path,
+            "created_at": self.created_at.isoformat()
+        }
+
+# Add relationship to Bookmark
+Bookmark.history = db.relationship('BookmarkHistory', backref='bookmark', lazy=True, cascade="all, delete-orphan")

@@ -81,16 +81,21 @@ body {
     font-weight: 600;
 }
 
-.sidebar a.btn-nav {
+.btn-nav {
     background: var(--accent-color);
     color: var(--bg-color);
     font-weight: 800;
     text-align: center;
     margin-top: 0.5rem;
     box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);
+    text-decoration: none;
+    display: block;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s;
 }
 
-.sidebar a.btn-nav:hover {
+.btn-nav:hover {
     background: #fff;
     color: var(--bg-color);
     transform: translateY(-2px);
@@ -148,12 +153,63 @@ li {
 }
 
 .badge {
-    background: rgba(56, 189, 248, 0.2);
+    background: rgba(56, 189, 248, 0.1);
     color: var(--accent-color);
     padding: 0.25rem 0.75rem;
     border-radius: 9999px;
     font-size: 0.8rem;
     font-weight: 600;
+    display: inline-block;
+    border: 1px solid transparent;
+}
+
+.badge-released {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    border-color: rgba(16, 185, 129, 0.2);
+}
+
+.badge-planning {
+    background: rgba(56, 189, 248, 0.1);
+    color: var(--accent-color);
+    border-color: rgba(56, 189, 248, 0.2);
+}
+
+.badge-backlog {
+    background: rgba(148, 163, 184, 0.1);
+    color: var(--text-dim);
+}
+
+/* Card Improvements */
+.glass-card-interactive {
+    cursor: pointer;
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+.glass-card-interactive:hover {
+    transform: translateY(-4px);
+    border-color: rgba(56, 189, 248, 0.3);
+}
+
+/* Grid Layouts */
+.grid-container {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    margin-top: 1.5rem;
+}
+
+.grid-item {
+    flex: 1;
+    min-width: 250px;
+}
+
+/* Typography Enhancements */
+.text-gradient {
+    background: linear-gradient(135deg, #fff 0%, #a5f3fc 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 pre {
@@ -162,6 +218,7 @@ pre {
     border-radius: 0.75rem;
     border: 1px solid var(--glass-border);
     margin-bottom: 1.5rem;
+    overflow-x: auto;
 }
 
 @media (max-width: 768px) {

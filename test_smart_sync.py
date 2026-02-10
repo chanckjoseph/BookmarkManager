@@ -2,8 +2,10 @@ import json
 import urllib.request
 import urllib.error
 
-API_BASE = "http://localhost:5000"
-PROFILE_PATH = "/home/joseph/.mozilla/firefox/xjlph276.default-release-1761459509703"
+import os
+
+API_BASE = os.environ.get('API_BASE_URL', 'http://localhost:5000')
+PROFILE_PATH = os.environ.get('FIREFOX_PROFILE_PATH', './empty_chrome_profile') # Fallback for safety
 
 def print_step(title):
     print(f"\n>> {title}")

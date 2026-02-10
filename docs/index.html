@@ -17,7 +17,7 @@
 
     <main class="main-content">
         <header>
-            <h1>Bookmark Manager</h1>
+            <h1 class="text-gradient">Bookmark Manager</h1>
             <p>Master Documentation Hub for the Multi-Agent Development Team.</p>
         </header>
 
@@ -26,38 +26,48 @@
             <p>This organized hub contains all tactical and architectural documentation for the Bookmark Manager
                 project. Use the sidebar to navigate between different categories.</p>
 
-            <a href="../prototype/dashboard.html" class="glass-card"
-                style="display: inline-block; padding: 1rem 2rem; background: var(--accent-color); color: var(--bg-color); text-decoration: none; font-weight: 800; border-radius: 0.5rem; margin-top: 1rem; border: none;">
+            <a href="https://bookmark-manager.local" class="btn-nav"
+                style="display: inline-block; padding: 1rem 2rem; margin-top: 1rem;">
                 🚀 Launch Bookmark Manager
             </a>
 
             <p style="margin-top: 2rem;">This hub is maintained by the <strong>Doc Manager</strong> agent with a mandate
-                for <strong>Zero
-                    Summarization</strong> and <strong>Maximum Fidelity</strong> to the source brain artifacts.</p>
+                for <strong>Zero Summarization</strong> and <strong>Maximum Fidelity</strong> to the source brain
+                artifacts.</p>
         </section>
 
         <section class="glass-card">
             <h2>Sprint History</h2>
-            <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 1rem;">
-                <a href="sprints/sprint-01/index.html" class="glass-card"
-                    style="flex: 1; min-width: 200px; padding: 1.5rem; text-decoration: none; color: inherit; transition: transform 0.2s;">
+            <div class="grid-container">
+                <a href="sprints/sprint-01/index.html" class="glass-card glass-card-interactive grid-item"
+                    style="padding: 1.5rem; text-decoration: none; color: inherit;">
                     <h3 style="margin-top: 0; color: var(--accent-color);">Sprint 01</h3>
-                    <p style="font-size: 0.9rem; margin-bottom: 0;">Feasibility Prototype & Workflow Design</p>
-                    <span class="badge" style="margin-top: 10px; display: inline-block;">COMPLETED</span>
+                    <p style="font-size: 0.9rem; margin-bottom: 0;">Feasibility Prototype</p>
+                    <span class="badge">COMPLETED</span>
                 </a>
-                <a href="sprints/sprint-03/index.html" class="glass-card"
-                    style="flex: 1; min-width: 200px; padding: 1.5rem; text-decoration: none; color: inherit; transition: transform 0.2s;">
+                <a href="sprints/sprint-02/index.html" class="glass-card glass-card-interactive grid-item"
+                    style="padding: 1.5rem; text-decoration: none; color: inherit;">
+                    <h3 style="margin-top: 0; color: #10b981;">Sprint 02</h3>
+                    <p style="font-size: 0.9rem; margin-bottom: 0;">MVP Core (Paths & Detection)</p>
+                    <span class="badge badge-released">RELEASED</span>
+                </a>
+                <a href="sprints/sprint-03/index.html" class="glass-card glass-card-interactive grid-item"
+                    style="padding: 1.5rem; text-decoration: none; color: inherit;">
                     <h3 style="margin-top: 0; color: #10b981;">Sprint 03</h3>
-                    <p style="font-size: 0.9rem; margin-bottom: 0;">MVP Construction (Persistence & Sync)</p>
-                    <span class="badge"
-                        style="margin-top: 10px; display: inline-block; background: #10b981;">RELEASED</span>
+                    <p style="font-size: 0.9rem; margin-bottom: 0;">MVP Construction (Persistence)</p>
+                    <span class="badge badge-released">RELEASED</span>
                 </a>
-                <a href="sprints/sprint-04/index.html" class="glass-card"
-                    style="flex: 1; min-width: 200px; padding: 1.5rem; text-decoration: none; color: inherit; transition: transform 0.2s;">
+                <a href="sprints/sprint-04/index.html" class="glass-card glass-card-interactive grid-item"
+                    style="padding: 1.5rem; text-decoration: none; color: inherit;">
                     <h3 style="margin-top: 0; color: #10b981;">Sprint 04</h3>
-                    <p style="font-size: 0.9rem; margin-bottom: 0;">Organization & Search (Taxonomy)</p>
-                    <span class="badge"
-                        style="margin-top: 10px; display: inline-block; background: #10b981;">RELEASED</span>
+                    <p style="font-size: 0.9rem; margin-bottom: 0;">Organization & Search</p>
+                    <span class="badge badge-released">RELEASED</span>
+                </a>
+                <a href="sprints/sprint-05/index.html" class="glass-card glass-card-interactive grid-item"
+                    style="padding: 1.5rem; text-decoration: none; color: inherit;">
+                    <h3 style="margin-top: 0; color: var(--accent-color);">Sprint 05</h3>
+                    <p style="font-size: 0.9rem; margin-bottom: 0;">UX Excellence & Performance</p>
+                    <span class="badge badge-planning">PLANNING</span>
                 </a>
             </div>
         </section>
@@ -65,10 +75,11 @@
         <section class="glass-card">
             <h2>Current Project Status</h2>
             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <span class="badge" style="background: #10b981; color: #fff;">Sprint 01: RELEASED</span>
-                <span class="badge" style="background: #10b981; color: #fff;">Sprint 02: RELEASED</span>
-                <span class="badge" style="background: #10b981; color: #fff;">Sprint 03: RELEASED</span>
-                <span class="badge" style="background: #10b981; color: #fff;">Sprint 04: RELEASED</span>
+                <span class="badge" style="background: #10b981; color: #fff;">Sprint 01-04: RELEASED</span>
+                <span class="badge"
+                    style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8;">Sprint 05:
+                    PLANNING</span>
+                <span class="badge" style="background: #64748b; color: #fff;">Refactoring: DONE</span>
             </div>
         </section>
 

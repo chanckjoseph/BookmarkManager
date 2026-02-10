@@ -185,35 +185,147 @@
             color: var(--accent);
         }
 
-        /* Tree View Styles */
-        #folder-tree {
-            margin-top: 1rem;
-            font-size: 0.9rem;
+        /* Layout Refactor: UX Excellence */
+        body {
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
         }
 
-        .tree-item {
-            cursor: pointer;
-            padding: 4px 0;
+        .global-nav {
+            width: 70px;
+            background: #0f172a;
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 2rem;
+            gap: 2rem;
+            flex-shrink: 0;
+            z-index: 1000;
+        }
+
+        .nav-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
-            color: #cbd5e1;
+            justify-content: center;
+            color: #64748b;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 1.2rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .tree-item:hover {
+        .nav-icon:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            transform: scale(1.05);
+        }
+
+        .nav-icon.active {
+            background: rgba(56, 189, 248, 0.1);
+            color: var(--accent);
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.15);
+        }
+
+        .layout-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .context-sidebar {
+            width: 280px;
+            background: rgba(15, 23, 42, 0.5);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 2rem 1.5rem;
+            overflow-y: auto;
+            flex-shrink: 0;
+            backdrop-filter: blur(10px);
+        }
+
+        .main-stage {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem 3rem;
+            background: radial-gradient(circle at top right, rgba(15, 23, 42, 0.4), transparent);
+        }
+
+        /* Minimalist Table & Alignment */
+        .search-area {
+            margin-bottom: 2.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 2rem;
+            background: rgba(255, 255, 255, 0.02);
+            padding: 1.5rem 2rem;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+        }
+
+        .search-container {
+            flex: 1;
+            max-width: 600px;
+        }
+
+        .search-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            padding: 14px 24px;
+            border-radius: 14px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .search-input:focus {
+            border-color: var(--accent);
+            background: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.1);
+        }
+
+        /* Collapsible Tree Styles */
+        .tree-node {
+            margin-bottom: 4px;
+        }
+
+        .tree-label {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #94a3b8;
+            font-size: 0.9rem;
+            gap: 10px;
+        }
+
+        .tree-label:hover {
+            background: rgba(255, 255, 255, 0.05);
             color: #fff;
         }
 
-        .tree-item.active {
+        .tree-label.active {
+            background: rgba(56, 189, 248, 0.1);
             color: var(--accent);
-            font-weight: bold;
+            font-weight: 600;
         }
 
         .tree-toggle {
-            width: 20px;
-            text-align: center;
-            margin-right: 4px;
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.6rem;
             opacity: 0.5;
-            font-size: 0.7rem;
             transition: transform 0.2s;
         }
 
@@ -225,74 +337,285 @@
             padding-left: 20px;
             display: none;
             border-left: 1px solid rgba(255, 255, 255, 0.05);
+            margin-left: 7px;
         }
 
         .tree-children.visible {
             display: block;
         }
 
-        .folder-icon {
-            margin-right: 6px;
-            opacity: 0.7;
+        h2.sidebar-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #64748b;
+            margin-bottom: 1.5rem;
+            margin-top: 0;
+        }
+
+        /* Bookmark Bar Styles */
+        .bookmark-bar {
+            grid-column: 1 / -1;
+            display: flex;
+            align-items: center;
+            background: linear-gradient(180deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.8) 100%);
+            border-bottom: 1px solid var(--border);
+            padding: 0 2rem;
+            gap: 0.5rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(20px);
+            margin: -2rem -2rem 1.5rem -2rem;
+            height: 48px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .bar-item {
+            position: relative;
+            cursor: pointer;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: #cbd5e1;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            white-space: nowrap;
+            height: 32px;
+        }
+
+        .bar-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+            transform: translateY(-1px);
+        }
+
+        .bar-item.active {
+            color: var(--accent);
+            background: rgba(56, 189, 248, 0.1);
+            font-weight: 600;
+            box-shadow: inset 0 0 15px rgba(56, 189, 248, 0.05);
+        }
+
+        /* Dropdown Styles */
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            min-width: 240px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.05);
+            display: none;
+            flex-direction: column;
+            padding: 0.6rem;
+            z-index: 1100;
+            animation: slideDown 0.2s cubic-bezier(0, 0, 0.2, 1);
+            backdrop-filter: blur(15px);
+            margin-top: 5px;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .bar-item:hover>.dropdown-menu {
+            display: flex;
+        }
+
+        .dropdown-item {
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: #cbd5e1;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.2s;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .dropdown-item:hover {
+            background: var(--accent);
+            color: #000;
+            font-weight: 600;
+        }
+
+        .dropdown-item .submenu {
+            position: absolute;
+            left: 100%;
+            top: -5px;
+            background: rgba(15, 23, 42, 0.98);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            min-width: 240px;
+            display: none;
+            flex-direction: column;
+            padding: 0.6rem;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+            animation: slideRight 0.2s cubic-bezier(0, 0, 0.2, 1);
+            margin-left: 5px;
+        }
+
+        /* Table Design: Fixed alignment */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            /* Force alignment */
+        }
+
+        th,
+        td {
+            padding: 14px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        th {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #64748b;
+            font-weight: 600;
+        }
+
+        /* Column Widths */
+        .col-title {
+            width: 35%;
+        }
+
+        .col-folder {
+            width: 20%;
+            color: #64748b;
+            font-size: 0.8rem;
+        }
+
+        .col-tags {
+            width: 20%;
+        }
+
+        .col-source {
+            width: 15%;
+        }
+
+        .col-status {
+            width: 5%;
+        }
+
+        .col-history {
+            width: 5%;
+            text-align: center;
+        }
+
+        .tag-pill {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            margin-right: 4px;
+            margin-bottom: 4px;
+        }
+
+        .history-btn {
+            background: none;
+            border: none;
+            color: #64748b;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: color 0.2s;
+            padding: 4px;
+            border-radius: 4px;
+        }
+
+        .history-btn:hover {
+            color: var(--accent);
+            background: rgba(56, 189, 248, 0.1);
+        }
+
+        .history-item {
+            padding: 12px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-item:hover {
+            border-color: rgba(56, 189, 248, 0.3);
         }
     </style>
 </head>
 
 <body>
-    <div class="grid">
-        <!-- Sidebar: Tools -->
-        <div class="sidebar">
-            <!-- Folder Tree Section -->
-            <section class="glass-card">
-                <h2>Folders</h2>
-                <div class="tree-item active" onclick="filterByFolder(null, this)">
-                    <span class="tree-toggle" style="opacity:0"></span>
-                    <span class="folder-icon">📂</span> All Bookmarks
+    <nav class="global-nav">
+        <a href="/dashboard" class="nav-icon active" title="Dashboard">🏠</a>
+        <a href="/tools" class="nav-icon" title="Tools">🛠️</a>
+        <a href="/history" class="nav-icon" title="History">📜</a>
+    </nav>
+
+    <div class="layout-container">
+        <!-- Context Sidebar: Folders -->
+        <aside class="context-sidebar">
+            <h2 class="sidebar-title">Collections</h2>
+            <div id="folder-tree-container">
+                <div class="tree-node">
+                    <div class="tree-label active" onclick="filterByFolder(null, this)">
+                        <span class="tree-toggle" style="opacity:0">▶</span>
+                        <span class="folder-icon">📂</span> All Bookmarks
+                    </div>
                 </div>
                 <div id="folder-tree">
-                    <!-- Tree injected here -->
+                    <!-- Collapsible Tree injected here -->
                 </div>
-            </section>
+            </div>
+        </aside>
 
-            <!-- Single Add Removed from Scope -->
-
-            <section class="glass-card" style="margin-top:2rem;">
-                <h2>2. Bulk Import (Detection)</h2>
-                <div id="env-status">Detecting environment...</div>
-                <div id="profiles-list"></div>
-
-                <hr style="border:0; border-top: 1px solid var(--border); margin: 1.5rem 0;">
-
-                <h3>Manual Upload</h3>
-                <p style="font-size: 0.7rem; opacity: 0.6;">Upload an HTML or Chrome JSON 'Bookmarks' file:</p>
-                <input type="file" id="file-input" style="font-size: 0.8rem;">
-                <button class="btn" style="margin-top: 10px;" onclick="uploadFile()">Upload & Parse</button>
-            </section>
-        </div>
-
-        <!-- Main: Bookmark List -->
-        <div class="main">
-            <!-- Pending Syncs Notification Area -->
-            <div id="pending-syncs-container"></div>
+        <!-- Main Stage -->
+        <main class="main-stage">
+            <header class="search-area">
+                <div class="search-container">
+                    <input type="text" class="search-input" id="search-input" placeholder="Search your library..."
+                        oninput="handleSearch(this.value)">
+                </div>
+                <button class="btn" onclick="refreshList()">Refresh</button>
+            </header>
 
             <section class="glass-card">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                    <h2 style="border:none; margin:0;">Verified List</h2>
-
-                    <div class="search-container">
-                        <input type="text" class="search-input" id="search-input" placeholder="Search titles or URLs..."
-                            oninput="handleSearch(this.value)">
-                    </div>
-
-                    <button class="btn" onclick="refreshList()">Refresh</button>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h2 style="border:none; margin:0; font-family: 'Outfit', sans-serif;">Library</h2>
                 </div>
                 <table>
                     <thead>
                         <tr>
-                            <th>Title</th>
-                            <th>Tags</th>
-                            <th>Source</th>
-                            <th>Status</th>
+                            <th class="col-title">Title & URL</th>
+                            <th class="col-folder">Folder Path</th>
+                            <th class="col-tags">Tags</th>
+                            <th class="col-source">Source</th>
+                            <th class="col-status">Status</th>
+                            <th class="col-history"></th>
                         </tr>
                     </thead>
                     <tbody id="bookmark-table-body">
@@ -300,183 +623,77 @@
                     </tbody>
                 </table>
             </section>
-        </div>
+        </main>
     </div>
 
-    <!-- Review Modal -->
-    <div id="review-modal"
+    <!-- History Modal -->
+    <div id="history-modal"
         style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; align-items:center; justify-content:center;">
         <div class="glass-card"
-            style="width: 80%; max-width: 800px; max-height: 80vh; display:flex; flex-direction:column; background: #0f172a;">
+            style="width: 500px; max-height: 80vh; display:flex; flex-direction:column; background: #0f172a; padding: 1.5rem;">
             <div
-                style="display:flex; justify-content:space-between; margin-bottom:1rem; border-bottom:1px solid var(--border); padding-bottom:1rem;">
-                <h2 style="margin:0; border:none;">Review Changes</h2>
-                <button class="btn" onclick="closeModal()" style="background:transparent; color:#fff;">✕</button>
+                style="display:flex; justify-content:space-between; margin-bottom:1.5rem; border-bottom:1px solid var(--border); padding-bottom:1rem;">
+                <h2 style="margin:0; border:none; font-family: 'Outfit';">Version History</h2>
+                <button onclick="closeHistory()"
+                    style="background:none; border:none; color:#fff; cursor:pointer; font-size:1.2rem;">✕</button>
             </div>
-
-            <div id="diff-list" style="flex:1; overflow-y:auto; margin-bottom:1rem; font-size:0.9rem;">
-                <!-- Diffs go here -->
-            </div>
-
-            <div
-                style="display:flex; justify-content:flex-end; gap:10px; border-top:1px solid var(--border); padding-top:1rem;">
-                <button class="btn" style="background:#ef4444;" onclick="rejectBatch()">Reject All</button>
-                <button class="btn" style="background:#10b981;" onclick="commitBatch()">Approve & Merge</button>
+            <div id="history-list" style="flex:1; overflow-y:auto; padding-right: 5px;">
+                <!-- History items go here -->
             </div>
         </div>
     </div>
 
+
     <script>
-        const API_BASE = 'http://localhost:5000';
+        const API_BASE = '{{ API_BASE_URL }}';
+        let searchDebounce;
 
         async function init() {
-            // 1. Detect Environment
-            try {
-                const res = await fetch(`${API_BASE}/env`);
-                const data = await res.json();
-                document.getElementById('env-status').innerHTML = `<strong>OS:</strong> ${data.env.os}`;
-
-                const profilesList = document.getElementById('profiles-list');
-                profilesList.innerHTML = '';
-                data.env.profiles.forEach(p => {
-                    const item = document.createElement('div');
-                    item.className = 'profile-item';
-                    item.innerHTML = `
-                        <strong>${p.browser}</strong> (${p.name})
-                        <code>${p.path}</code>
-                        <button class="btn" onclick="openAndGuide('${p.path}')">Open Folder & Find File</button>
-                        ${p.browser.toLowerCase().includes('firefox') ?
-                            `<button class="btn" style="background:var(--accent); color:#000; margin-left:10px;" onclick="syncFirefox('${p.path}')">Sync Firefox</button>` :
-                            `<button class="btn" style="background:#f59e0b; color:#000; margin-left:10px;" onclick="syncChrome('${p.path}')">Sync Chrome</button>`
-                        }
-                    `;
-                    profilesList.appendChild(item);
-                });
-            } catch (e) { document.getElementById('env-status').innerText = "Backend Offline"; }
-
-            // 2. Initial List Load
             refreshList();
-            checkPendingSyncs();
         }
-
-        async function checkPendingSyncs() {
-            try {
-                const res = await fetch(`${API_BASE}/sync/batches`);
-                const data = await res.json();
-                const container = document.getElementById('pending-syncs-container');
-                container.innerHTML = '';
-
-                if (data.batches && data.batches.length > 0) {
-                    data.batches.forEach(batch => {
-                        container.innerHTML += `
-                            <div class="glass-card" style="border: 1px solid #f59e0b; background: rgba(245, 158, 11, 0.1); margin-bottom: 2rem;">
-                                <div style="display:flex; justify-content:space-between; align-items:center;">
-                                    <div>
-                                        <h3 style="color: #f59e0b; margin-top: 0; display:flex; align-items:center; gap:8px;">
-                                            <span>⚠️</span> Pending Review: Batch #${batch.id}
-                                        </h3>
-                                        <p style="margin-bottom:0; font-size:0.9rem;">
-                                            Source: <strong>${batch.source}</strong> | Changes: <strong>${batch.count}</strong>
-                                        </p>
-                                    </div>
-                                    <button class="btn" style="background: #f59e0b; color: white;" onclick="startReview(${batch.id})">Review Changes</button>
-                                </div>
-                            </div>
-                        `;
-                    });
-                }
-            } catch (e) { console.error("Sync check failed", e); }
-        }
-
-        let currentBatchId = null;
-
-        async function startReview(batchId) {
-            currentBatchId = batchId;
-            const modal = document.getElementById('review-modal');
-            const list = document.getElementById('diff-list');
-            list.innerHTML = '<p>Loading changes...</p>';
-            modal.style.display = 'flex';
-
-            try {
-                const res = await fetch(`${API_BASE}/sync/batch/${batchId}`);
-                const data = await res.json();
-
-                if (data.status === 'success') {
-                    list.innerHTML = '';
-                    const changes = data.batch.changes.sort((a, b) => a.id - b.id);
-
-                    if (changes.length === 0) {
-                        list.innerHTML = '<p>No changes found.</p>';
-                        return;
-                    }
-
-                    changes.forEach(change => {
-                        const diff = change.diff; // Already parsed by API
-                        const item = document.createElement('div');
-                        item.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
-                        item.style.padding = '8px 0';
-                        item.innerHTML = `
-                            <div style="display:flex; align-items:center; gap:10px;">
-                                <span style="background:#10b981; color:#000; font-size:0.7rem; padding:2px 4px; border-radius:4px;">NEW</span>
-                                <div style="flex:1;">
-                                    <div style="font-weight:bold;">${diff.title}</div>
-                                    <div style="font-size:0.8rem; opacity:0.6; word-break:break-all;">${diff.url}</div>
-                                    <div style="font-size:0.75rem; color:var(--accent); margin-top:2px;">📂 ${diff.folder}</div>
-                                </div>
-                            </div>
-                        `;
-                        list.appendChild(item);
-                    });
-                }
-            } catch (e) {
-                list.innerHTML = `<p style="color:red">Error: ${e.message}</p>`;
-            }
-        }
-
-        function closeModal() {
-            document.getElementById('review-modal').style.display = 'none';
-        }
-
-        async function commitBatch() {
-            if (!currentBatchId) return;
-            if (!confirm("Approve and merge these changes into your main library?")) return;
-
-            try {
-                const res = await fetch(`${API_BASE}/sync/commit/${currentBatchId}`, { method: 'POST' });
-                const data = await res.json();
-                if (data.status === 'success') {
-                    alert(data.message);
-                    closeModal();
-                    checkPendingSyncs(); // Refresh badge
-                    refreshList(); // Refresh main table
-                } else {
-                    alert("Error: " + data.message);
-                }
-            } catch (e) { alert("Commit failed: " + e); }
-        }
-
-        async function rejectBatch() {
-            if (!currentBatchId) return;
-            if (!confirm("Discard all changes in this batch? This cannot be undone.")) return;
-
-            try {
-                const res = await fetch(`${API_BASE}/sync/reject/${currentBatchId}`, { method: 'POST' });
-                const data = await res.json();
-                if (data.status === 'success') {
-                    alert(data.message);
-                    closeModal();
-                    checkPendingSyncs();
-                }
-            } catch (e) { alert("Reject failed: " + e); }
-        }
-
-        let searchDebounce;
 
         function handleSearch(query) {
             clearTimeout(searchDebounce);
             searchDebounce = setTimeout(() => {
                 refreshList(query);
             }, 300);
+        }
+
+        async function checkPendingSyncs() {
+            try {
+                // This dashboard doesn't have a container for badges by default, 
+                // but we should keep the logic if we want to show a 'Sync Required' notice.
+                const res = await fetch(`${API_BASE}/sync/batches`);
+                const data = await res.json();
+                if (data.batches && data.batches.length > 0) {
+                    console.log("Pending sync batches available.");
+                }
+            } catch (e) { console.error("Sync check failed", e); }
+        }
+
+        async function removeTag(bmId, tagId) {
+            if (!confirm("Remove this tag?")) return;
+            try {
+                const res = await fetch(`${API_BASE}/bookmarks/${bmId}/tags/${tagId}`, { method: 'DELETE' });
+                if (res.ok) refreshList();
+            } catch (e) { alert("Delete failed"); }
+        }
+
+        function promptAddTag(bmId) {
+            const name = prompt("Enter tag name:");
+            if (name) addTag(bmId, name);
+        }
+
+        async function addTag(bmId, name) {
+            try {
+                const res = await fetch(`${API_BASE}/bookmarks/${bmId}/tags`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name })
+                });
+                if (res.ok) refreshList();
+                else alert("Tag already exists or failed to add.");
+            } catch (e) { alert("Add failed"); }
         }
 
         let state = {
@@ -490,8 +707,9 @@
             const root = {};
 
             bookmarks.forEach(bm => {
-                if (!bm.folder) return;
-                const parts = bm.folder.split('/').filter(p => p.trim() !== "");
+                // Ensure folder strings are normalized
+                // Match the ' > ' separator used in the database
+                const parts = bm.folder.split(' > ').filter(p => p.trim() !== "");
                 let current = root;
 
                 parts.forEach(part => {
@@ -504,22 +722,20 @@
             return root;
         }
 
-        function renderFolderTree(node, container, path = "") {
+        function renderCollapsibleTree(node, container, path = "") {
             const folders = Object.keys(node).sort();
 
             folders.forEach(folderName => {
-                const fullPath = path ? `${path}/${folderName}` : folderName;
+                const fullPath = path ? `${path} > ${folderName}` : folderName;
                 const children = node[folderName]._children;
                 const hasChildren = Object.keys(children).length > 0;
 
-                const itemDiv = document.createElement('div');
+                const nodeDiv = document.createElement('div');
+                nodeDiv.className = 'tree-node';
 
                 const labelDiv = document.createElement('div');
-                labelDiv.className = 'tree-item';
-                labelDiv.onclick = (e) => {
-                    e.stopPropagation();
-                    filterByFolder(fullPath, labelDiv);
-                };
+                labelDiv.className = 'tree-label';
+                if (state.currentFolder === fullPath) labelDiv.classList.add('active');
 
                 const toggle = document.createElement('span');
                 toggle.className = 'tree-toggle';
@@ -528,23 +744,37 @@
                     toggle.onclick = (e) => {
                         e.stopPropagation();
                         toggle.classList.toggle('expanded');
-                        const childContainer = itemDiv.querySelector('.tree-children');
+                        const childContainer = nodeDiv.querySelector('.tree-children');
                         childContainer.classList.toggle('visible');
                     };
                 }
 
+                const icon = document.createElement('span');
+                icon.className = 'folder-icon';
+                icon.innerText = '📂';
+
+                const text = document.createElement('span');
+                text.innerText = folderName;
+
                 labelDiv.appendChild(toggle);
-                labelDiv.innerHTML += `<span class="folder-icon">📂</span> ${folderName}`;
-                itemDiv.appendChild(labelDiv);
+                labelDiv.appendChild(icon);
+                labelDiv.appendChild(text);
+
+                labelDiv.onclick = (e) => {
+                    if (e.target.className === 'tree-toggle') return;
+                    filterByFolder(fullPath, labelDiv);
+                };
+
+                nodeDiv.appendChild(labelDiv);
 
                 if (hasChildren) {
                     const childContainer = document.createElement('div');
                     childContainer.className = 'tree-children';
-                    renderFolderTree(children, childContainer, fullPath);
-                    itemDiv.appendChild(childContainer);
+                    renderCollapsibleTree(children, childContainer, fullPath);
+                    nodeDiv.appendChild(childContainer);
                 }
 
-                container.appendChild(itemDiv);
+                container.appendChild(nodeDiv);
             });
         }
 
@@ -552,7 +782,7 @@
             state.currentFolder = path;
 
             // UI Highlight
-            document.querySelectorAll('.tree-item').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tree-label').forEach(el => el.classList.remove('active'));
             if (element) element.classList.add('active');
 
             refreshListDatasource();
@@ -560,36 +790,38 @@
 
         function refreshListDatasource() {
             const tbody = document.getElementById('bookmark-table-body');
-            tbody.innerHTML = '';
-
             let filtered = state.allBookmarks;
 
             // Filter by Folder
             if (state.currentFolder) {
                 filtered = filtered.filter(bm => {
-                    return bm.folder === state.currentFolder || (bm.folder && bm.folder.startsWith(state.currentFolder + '/'));
+                    return bm.folder === state.currentFolder || (bm.folder && bm.folder.startsWith(state.currentFolder + ' > '));
                 });
             }
 
-            // Render
-            filtered.forEach(bm => renderRow(bm, tbody));
+            // High-Performance Render
+            const fragment = document.createDocumentFragment();
+            filtered.forEach(bm => renderRow(bm, fragment));
+
+            tbody.innerHTML = '';
+            tbody.appendChild(fragment);
         }
 
-        function renderRow(bm, tbody, query = "") { // extracted from refreshList
+        function renderRow(bm, fragment, regex = null) {
+            const tr = document.createElement('tr');
             let statusHtml = '<span style="color:#10b981">✓ Synced</span>';
-            let rowStyle = '';
 
             if (bm.status === 'absent_on_source') {
                 statusHtml = '<span class="badge" style="background:#ef4444; color:#fff">⚠️ Missing in Source</span>';
-                rowStyle = 'opacity: 0.6; background: rgba(239, 68, 68, 0.05);';
+                tr.style.opacity = '0.6';
+                tr.style.background = 'rgba(239, 68, 68, 0.05)';
             }
 
             // Highlighting Logic
             let displayTitle = bm.title || "No Title";
             let displayUrl = bm.url;
 
-            if (query) {
-                const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+            if (regex) {
                 displayTitle = displayTitle.replace(regex, '<span class="highlight">$1</span>');
                 displayUrl = displayUrl.replace(regex, '<span class="highlight">$1</span>');
             }
@@ -605,141 +837,109 @@
                 `).join('');
             }
 
-            const row = `<tr style="${rowStyle}">
-            <td>
-                <strong>${displayTitle}</strong>
-                <br><span style="font-size:0.7rem; opacity:0.5">${displayUrl}</span>
-            </td>
-            <td>
-                ${tagsHtml} 
-                <button class="tag-add-btn" onclick="promptAddTag(${bm.id})">+</button>
-            </td>
-            <td><span class="source-badge">${bm.source}</span></td>
-            <td>${statusHtml}</td>
-        </tr>`;
-            tbody.innerHTML += row;
+            tr.innerHTML = `
+                <td class="col-title" title="${bm.url}">
+                    <div style="font-weight:600; overflow:hidden; text-overflow:ellipsis;">${displayTitle}</div>
+                    <div style="font-size:0.75rem; opacity:0.5; overflow:hidden; text-overflow:ellipsis;">${displayUrl}</div>
+                </td>
+                <td class="col-folder">
+                    <div style="display:flex; align-items:center; gap:6px; opacity:0.8;">
+                        <span style="font-size:0.9rem">📂</span> 
+                        <span style="overflow:hidden; text-overflow:ellipsis;" title="${bm.folder || 'Root'}">
+                            ${bm.folder || '<span style="opacity:0.4 italic">Root</span>'}
+                        </span>
+                    </div>
+                </td>
+                <td class="col-tags">
+                    <div style="display:flex; flex-wrap:wrap; gap:4px;">
+                        ${tagsHtml}
+                    </div>
+                    <button class="tag-add-btn" onclick="promptAddTag(${bm.id})">+</button>
+                </td>
+                <td class="col-source"><span class="source-badge">${bm.source}</span></td>
+                <td class="col-status">${statusHtml}</td>
+                <td class="col-history" style="text-align:center;">
+                    <button class="history-btn" onclick="viewHistory(${bm.id})" title="Version History">📜</button>
+                </td>
+            `;
+            fragment.appendChild(tr);
+        }
+
+        async function viewHistory(id) {
+            const modal = document.getElementById('history-modal');
+            const list = document.getElementById('history-list');
+            list.innerHTML = '<p style="opacity:0.5;">Loading history...</p>';
+            modal.style.display = 'flex';
+
+            try {
+                const res = await fetch(`${API_BASE}/bookmarks/${id}/history`);
+                const data = await res.json();
+                list.innerHTML = '';
+
+                if (data.history.length === 0) {
+                    list.innerHTML = '<p style="opacity:0.5; padding:2rem; text-align:center;">No previous versions found.</p>';
+                    return;
+                }
+
+                data.history.forEach(h => {
+                    const date = new Date(h.created_at).toLocaleString();
+                    const item = document.createElement('div');
+                    item.className = 'history-item';
+                    item.innerHTML = `
+                        <div>
+                            <div style="font-weight:600; font-size:0.85rem;">v${h.version}: ${h.title}</div>
+                            <div style="font-size:0.7rem; opacity:0.5;">${date}</div>
+                        </div>
+                        <button class="btn" style="font-size:0.7rem; padding:4px 8px; background:rgba(56, 189, 248, 0.1); color:var(--accent);" 
+                                onclick="revertTo(${id}, ${h.id})">Revert</button>
+                    `;
+                    list.appendChild(item);
+                });
+            } catch (e) { list.innerHTML = 'Failed to load history.'; }
+        }
+
+        function closeHistory() { document.getElementById('history-modal').style.display = 'none'; }
+
+        async function revertTo(bmId, historyId) {
+            if (!confirm("Revert this bookmark to this version?")) return;
+            const res = await fetch(`${API_BASE}/bookmarks/${bmId}/revert/${historyId}`, { method: 'POST' });
+            if (res.ok) {
+                alert("Bookmark reverted!");
+                closeHistory();
+                refreshList();
+            }
         }
 
         // --- End Folder Logic ---
 
         async function refreshList(query = "") {
+            const tbody = document.getElementById('bookmark-table-body');
             try {
                 const url = query ? `${API_BASE}/bookmarks?q=${encodeURIComponent(query)}` : `${API_BASE}/bookmarks`;
                 const res = await fetch(url);
                 const data = await res.json();
+                const bookmarks = data.bookmarks || data.data || [];
 
                 if (!query) {
-                    state.allBookmarks = data.data; // Cache for folder filtering
-
-                    // Rebuild Tree only on full refresh
+                    state.allBookmarks = bookmarks;
                     const treeContainer = document.getElementById('folder-tree');
                     treeContainer.innerHTML = '';
                     const treeRoot = buildFolderTree(state.allBookmarks);
-                    renderFolderTree(treeRoot, treeContainer);
+                    renderCollapsibleTree(treeRoot, treeContainer);
                 }
 
-                const tbody = document.getElementById('bookmark-table-body');
-                tbody.innerHTML = '';
+                // High-Performance Render
+                const fragment = document.createDocumentFragment();
+                const regex = query ? new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi') : null;
 
-                // If searching, show search results directly (bypassing folder filter for now, or we can combine)
-                // Let's just render the API results for now.
-                data.data.forEach(bm => renderRow(bm, tbody, query));
+                bookmarks.forEach(bm => renderRow(bm, fragment, regex));
+
+                tbody.innerHTML = '';
+                tbody.appendChild(fragment);
 
             } catch (e) { console.error("Load failed", e); }
         }
 
-        async function openAndGuide(path) {
-            await fetch(`${API_BASE}/open_folder`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ path })
-            });
-            alert("Guidance: Finder/Explorer has been opened. Look for the 'Bookmarks' file (no extension) or 'bookmarks.html'.");
-        }
-
-        async function syncFirefox(path) {
-            if (!confirm("Start Sync from Firefox? This will create a Pending Batch for review.")) return;
-            try {
-                const res = await fetch(`${API_BASE}/sync_firefox`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ path })
-                });
-                const data = await res.json();
-                if (data.status === 'success') {
-                    alert(`Sync Complete! Bench #${data.batch_id} created with ${data.count} changes.`);
-                    checkPendingSyncs();
-                } else {
-                    alert("Error: " + data.message);
-                }
-            } catch (e) { alert("Sync Failed: " + e); }
-        }
-
-        async function syncChrome(path) {
-            if (!confirm("Start Read-Only Sync from Chrome? This will create a Pending Batch for review.")) return;
-            try {
-                const res = await fetch(`${API_BASE}/sync_chrome`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ path })
-                });
-                const data = await res.json();
-                if (data.status === 'success') {
-                    alert(`Sync Complete! Bench #${data.batch_id} created with ${data.count} changes.`);
-                    checkPendingSyncs();
-                } else {
-                    alert("Error: " + data.message);
-                }
-            } catch (e) { alert("Sync Failed: " + e); }
-        }
-
-        async function uploadFile() {
-            const input = document.getElementById('file-input');
-            if (!input.files[0]) return alert("Select a file first");
-
-            const formData = new FormData();
-            formData.append('file', input.files[0]);
-
-            const res = await fetch(`${API_BASE}/upload_bulk`, {
-                method: 'POST',
-                body: formData
-            });
-            const data = await res.json();
-            alert(`Parsed ${data.count} items!`);
-            refreshList();
-        }
-
-        async function promptAddTag(bookmarkId) {
-            const name = prompt("Enter tag name:");
-            if (!name) return;
-
-            try {
-                const res = await fetch(`${API_BASE}/bookmarks/${bookmarkId}/tags`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name })
-                });
-                if (res.ok) {
-                    refreshList();
-                } else {
-                    alert("Failed to add tag");
-                }
-            } catch (e) { alert(e); }
-        }
-
-        async function removeTag(bookmarkId, tagId) {
-            if (!confirm("Remove this tag?")) return;
-            try {
-                const res = await fetch(`${API_BASE}/bookmarks/${bookmarkId}/tags/${tagId}`, {
-                    method: 'DELETE'
-                });
-                if (res.ok) {
-                    refreshList();
-                } else {
-                    alert("Failed to remove tag");
-                }
-            } catch (e) { alert(e); }
-        }
 
         init();
     </script>

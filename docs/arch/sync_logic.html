@@ -17,7 +17,7 @@
 
     <main class="main-content">
         <header>
-            <h1>Smart Sync Logic</h1>
+            <h1 class="text-gradient">Smart Sync Logic</h1>
             <p>Technical specification for the "Manual but Smart" synchronization engine.</p>
         </header>
 
@@ -59,14 +59,14 @@
                     <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
                         <td style="padding: 10px;"><strong>URL Not Found</strong><br><span
                                 style="font-size: 0.8rem; opacity: 0.6;">(New Bookmark)</span></td>
-                        <td style="padding: 10px;"><span class="badge" style="background:#10b981; color:#000;">CREATE
+                        <td style="padding: 10px;"><span class="badge badge-released" style="color:#000;">CREATE
                                 NEW</span></td>
                         <td style="padding: 10px;">Added to "Pending Review".<br>Commits as a new row.</td>
                     </tr>
                     <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
                         <td style="padding: 10px;"><strong>URL Found + Match</strong><br><span
                                 style="font-size: 0.8rem; opacity: 0.6;">(Existing, Unchanged)</span></td>
-                        <td style="padding: 10px;"><span class="badge" style="background:#64748b;">IGNORE</span></td>
+                        <td style="padding: 10px;"><span class="badge badge-backlog">IGNORE</span></td>
                         <td style="padding: 10px;">No action taken.</td>
                     </tr>
                     <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
@@ -83,7 +83,8 @@
             <p>If a bookmark exists in your library (sourced from Firefox) but is <strong>missing</strong> from the new
                 Firefox sync:</p>
             <ul>
-                <li><strong>Action:</strong> <span class="badge" style="background:#ef4444;">FLAG (SOFT DELETE)</span>
+                <li><strong>Action:</strong> <span class="badge" style="background:#ef4444; color:#fff;">FLAG (SOFT
+                        DELETE)</span>
                 </li>
                 <li><strong>Outcome:</strong>
                     <ul>
@@ -104,11 +105,6 @@
                 <li><code>manual</code>: Added manually or via file import. Ignored by Browser Sync.</li>
             </ul>
         </section>
-
-        <footer
-            style="text-align: center; margin-top: 3rem; color: var(--text-dim); font-size: 0.8rem; border-top: 1px solid var(--glass-border); padding-top: 2rem;">
-            &copy; 2026 Bookmark Manager Team | <strong>Last Updated:</strong> 2026-02-09
-        </footer>
     </main>
 </body>
 

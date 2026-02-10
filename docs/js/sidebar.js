@@ -33,7 +33,8 @@ const SIDEBAR_CONFIG = [
             { text: "Sprint 01: Feasibility", path: "sprints/sprint-01/index.html" },
             { text: "Sprint 02: MVP Core", path: "sprints/sprint-02/index.html" },
             { text: "Sprint 03: Persistence", path: "sprints/sprint-03/index.html" },
-            { text: "Sprint 04: Organization", path: "sprints/sprint-04/index.html" }
+            { text: "Sprint 04: Organization", path: "sprints/sprint-04/index.html" },
+            { text: "Sprint 05: UX & Perf", path: "sprints/sprint-05/index.html" }
         ]
     }
 ];
@@ -50,14 +51,15 @@ function renderSidebar() {
 
     let html = '';
 
+    // Render Navigation Links
     SIDEBAR_CONFIG.forEach(item => {
         if (item.isHeader && item.title) {
-            html += `<h1><a href="${prefix}${item.path}" style="color:white; text-decoration:none;">${item.title}</a></h1>`;
+            html += `<h1 style="margin-bottom:2rem;"><a href="${prefix}${item.path}" style="color:white; text-decoration:none;">${item.title}</a></h1>`;
         } else if (item.category) {
             html += `<h3>${item.category}</h3><ul>`;
             item.links.forEach(link => {
                 const fullPath = prefix + link.path;
-                const isActive = window.location.href.includes(link.path);
+                const isActive = window.location.pathname.endsWith(link.path);
                 const activeClass = isActive ? 'class="active"' : '';
                 const btnClass = link.isButton ? 'class="btn-nav"' : '';
 
@@ -67,7 +69,17 @@ function renderSidebar() {
         }
     });
 
+    // Add Global Sidebar Footer
+    const today = new Date().toISOString().split('T')[0];
+    html += `
+    <div style="margin-top: auto; padding-top: 2rem; font-size: 0.75rem; color: var(--text-dim); border-top: 1px solid var(--glass-border);">
+        <p>&copy; 2026 BM Team</p>
+        <p><strong>Updated:</strong> ${today}</p>
+    </div>`;
+
     container.innerHTML = html;
+    container.style.display = 'flex';
+    container.style.flexDirection = 'column';
 }
 
 document.addEventListener('DOMContentLoaded', renderSidebar);

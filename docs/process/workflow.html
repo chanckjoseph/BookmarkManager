@@ -26,38 +26,13 @@
 
 <body>
     <nav class="sidebar">
-        <h1>Docs Hub</h1>
-        <a href="../index.html"
-            style="margin-bottom: 2rem; display: block; font-size: 0.8rem; color: var(--accent-color);">← Back to
-            Home</a>
-
-        <h3>Architecture</h3>
-        <ul>
-            <li><a href="../arch/plan.html">Implementation Plan</a></li>
-        </ul>
-
-        <h3>Team & Process</h3>
-        <ul>
-            <li><a href="workflow.html" class="active">Multi-Agent Workflow</a></li>
-        </ul>
-
-        <h3>History & Sprints</h3>
-        <ul>
-            <li><a href="../sprints/sprint-01/index.html">Sprint 01: Feasibility</a></li>
-        </ul>
-
-        <h3>Source of Truth</h3>
-        <ul>
-            <li><a href="../../.brain_artifacts/implementation_plan.md">Brain: Plan (MD)</a></li>
-            <li><a href="../../.brain_artifacts/multi_agent_workflow.md">Brain: Workflow (MD)</a></li>
-            <li><a href="../../.brain_artifacts/pm_review.md">Brain: PM Review (MD)</a></li>
-            <li><a href="../../.brain_artifacts/task.md">Brain: Tasks (MD)</a></li>
-        </ul>
+        <!-- JS Populated -->
     </nav>
+    <script src="../js/sidebar.js"></script>
 
     <main class="main-content">
         <header>
-            <h1>Multi-Agent Development Workflow</h1>
+            <h1 class="text-gradient">Multi-Agent Development Workflow</h1>
             <p>Guidelines for collaborative agent development and release management.</p>
         </header>
 
@@ -112,6 +87,49 @@
         </section>
 
         <section class="glass-card">
+            <h2>Agent Persona & Configuration</h2>
+            <p>To ensure consistent behavior across different development environments, we rely on a centralized
+                <strong>Persona Strategy</strong>.
+            </p>
+
+            <h3>Configuration Files</h3>
+            <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+                <thead>
+                    <tr style="text-align: left; border-bottom: 2px solid var(--accent-color);">
+                        <th style="padding: 10px;">Platform</th>
+                        <th style="padding: 10px;">Config File</th>
+                        <th style="padding: 10px;">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Cursor</strong></td>
+                        <td><code>.cursorrules</code></td>
+                        <td><span class="badge" style="background: #22c55e;">Native Support</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Antigravity</strong></td>
+                        <td><code>.cursorrules</code> / <code>.agent/persona.md</code></td>
+                        <td><span class="badge" style="background: #22c55e;">Native Support</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>VS Code (Copilot)</strong></td>
+                        <td><code>.github/copilot-instructions.md</code></td>
+                        <td><span class="badge" style="background: #eab308;">Manual Config</span></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Source of Truth</h3>
+            <p>The master definition for all agent behaviors is located at:</p>
+            <code
+                style="display: block; padding: 1rem; background: rgba(0,0,0,0.3); border-radius: 6px; margin: 0.5rem 0;">.agent/persona.md</code>
+            <p>All tool-specific configuration files (like <code>.cursorrules</code>) simply point the agent to this
+                master file and enforce the <strong>Architect</strong> persona by default.</p>
+        </section>
+
+
+        <section class="glass-card">
             <h2>Sprint-Specific Release Cycle</h2>
             <div class="mermaid"
                 style="background: rgba(var(--accent-color-rgb), 0.05); padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem; border: 1px solid var(--glass-border);">
@@ -136,13 +154,15 @@
             <ol>
                 <li><strong>Stage 1: Strategy & Tasking (Architect & Sprint PM):</strong>
                     <ul>
-                        <li><strong>Sprint PM:</strong> Defines focus and requirements for the current sprint duration.
+                        <li><strong>Sprint PM:</strong> Defines focus and requirements for the current sprint
+                            duration.
                         </li>
                     </ul>
                 </li>
                 <li><strong>Stage 2: Doc Initialization (Doc Manager):</strong> Prepares feature context.</li>
                 <li><strong>Stage 3: Development (Feature Agent):</strong> Implementation and unit testing.</li>
-                <li><strong>Stage 4: Documentation (Doc Manager):</strong> Updates hub with development progress.</li>
+                <li><strong>Stage 4: Documentation (Doc Manager):</strong> Updates hub with development progress.
+                </li>
                 <li><strong>Stage 5: Verification (Sprint QA Engineer):</strong>
                     <ul>
                         <li>Dedicated tester for the current sprint.</li>
@@ -155,7 +175,8 @@
                         <li>Generates <code>pm_review.md</code> for the next milestone.</li>
                     </ul>
                 </li>
-                <li><strong>Stage 7: Final Documentation & Release (Doc Manager & Release Manager):</strong> 1:1 sync
+                <li><strong>Stage 7: Final Documentation & Release (Doc Manager & Release Manager):</strong> 1:1
+                    sync
                     and technical merge.</li>
                 <li><strong>Stage 8: Environment Sync (DevOps):</strong> Global synchronization.</li>
             </ol>
@@ -180,10 +201,6 @@
             </ul>
         </section>
 
-        <footer
-            style="text-align: center; margin-top: 3rem; color: var(--text-dim); font-size: 0.8rem; border-top: 1px solid var(--glass-border); padding-top: 2rem;">
-            &copy; 2026 Bookmark Manager Team | <strong>Last Updated:</strong> 2026-02-09
-        </footer>
     </main>
 </body>
 
