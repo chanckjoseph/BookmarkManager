@@ -345,7 +345,10 @@
                         <strong>${p.browser}</strong> (${p.name})
                         <code>${p.path}</code>
                         <button class="btn" onclick="openAndGuide('${p.path}')">Open Folder & Find File</button>
-                        <button class="btn" style="background:var(--accent); color:#000; margin-left:10px;" onclick="syncFirefox('${p.path}')">Sync Directly</button>
+                        ${p.browser.toLowerCase().includes('firefox') ?
+                            `<button class="btn" style="background:var(--accent); color:#000; margin-left:10px;" onclick="syncFirefox('${p.path}')">Sync Firefox</button>` :
+                            `<button class="btn" style="background:#f59e0b; color:#000; margin-left:10px;" onclick="syncChrome('${p.path}')">Sync Chrome</button>`
+                        }
                     `;
                     profilesList.appendChild(item);
                 });
@@ -658,6 +661,24 @@
             if (!confirm("Start Sync from Firefox? This will create a Pending Batch for review.")) return;
             try {
                 const res = await fetch(`${API_BASE}/sync_firefox`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ path })
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    alert(`Sync Complete! Bench #${data.batch_id} created with ${data.count} changes.`);
+                    checkPendingSyncs();
+                } else {
+                    alert("Error: " + data.message);
+                }
+            } catch (e) { alert("Sync Failed: " + e); }
+        }
+
+        async function syncChrome(path) {
+            if (!confirm("Start Read-Only Sync from Chrome? This will create a Pending Batch for review.")) return;
+            try {
+                const res = await fetch(`${API_BASE}/sync_chrome`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ path })

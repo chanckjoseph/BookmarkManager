@@ -134,6 +134,89 @@ def sync_firefox():
         db.session.rollback()
         return jsonify({"status": "error", "message": str(e)}), 500
 
+@app.route('/sync_chrome', methods=['POST'])
+def sync_chrome():
+    """
+    Smart Sync for Chrome: Reads 'Bookmarks' JSON and stages changes.
+    Ref: docs/arch/sync_logic.md
+    """
+    data = request.json
+    profile_path = data.get('path')
+    if not profile_path:
+        return jsonify({"status": "error", "message": "Missing profile path"}), 400
+        
+    try:
+        from chrome_parser import parse_chrome_bookmarks
+        bookmarks_file = os.path.join(profile_path, "Bookmarks")
+        if not os.path.exists(bookmarks_file):
+             return jsonify({"status": "error", "message": "Bookmarks file not found"}), 404
+
+        # 1. Read Incoming Data
+        incoming_bookmarks = parse_chrome_bookmarks(bookmarks_file)
+        
+        # 2. Fetch Existing State for this Source
+        # Compare against 'chrome%' source_browser
+        existing_query = Bookmark.query.filter(Bookmark.source_browser.ilike('chrome%'))
+        existing_map = {b.url: b for b in existing_query.all()}
+        
+        # 3. Create Batch
+        batch = SyncBatch(source="chrome_manual", status="pending_review")
+        db.session.add(batch)
+        db.session.commit()
+        
+        changes = []
+        incoming_urls = set()
+        
+        for bm in incoming_bookmarks:
+            url = bm['url']
+            
+            # De-duplication
+            if url in incoming_urls:
+                continue
+            incoming_urls.add(url)
+            
+            # Case A: NEW
+            if url not in existing_map:
+                changes.append(PendingChange(
+                    batch_id=batch.id,
+                    change_type="new",
+                    diff_blob=json.dumps(bm)
+                ))
+            else:
+                # Case B: EXISTING (Update)
+                existing = existing_map[url]
+                if existing.title != bm['title'] or existing.folder_path != bm['folder']:
+                     changes.append(PendingChange(
+                        batch_id=batch.id,
+                        change_type="update",
+                        bookmark_id=existing.id,
+                        diff_blob=json.dumps({
+                            "old": {"title": existing.title, "folder": existing.folder_path},
+                            "new": bm
+                        })
+                    ))
+        
+        # Case C: MISSING (Soft Delete)
+        for url, existing in existing_map.items():
+            if url not in incoming_urls:
+                if existing.status != 'absent_on_source':
+                    changes.append(PendingChange(
+                        batch_id=batch.id,
+                        change_type="mark_deleted",
+                        bookmark_id=existing.id,
+                        diff_blob=json.dumps({"title": existing.title, "url": existing.url})
+                    ))
+
+        if changes:
+            db.session.bulk_save_objects(changes)
+            db.session.commit()
+        
+        return jsonify({"status": "success", "batch_id": batch.id, "count": len(changes)})
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"status": "error", "message": str(e)}), 500
+
 @app.route('/sync/batches', methods=['GET'])
 def get_pending_batches():
     """Returns any batches waiting for review."""
