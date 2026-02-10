@@ -11,7 +11,11 @@ from database import db, Bookmark, SyncBatch, PendingChange
 
 app = Flask(__name__, template_folder='.')
 # Database Configuration
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///bookmarks.db'
+if os.environ.get('FLASK_ENV') == 'testing':
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+else:
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///bookmarks.db'
+    
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {'connect_args': {'timeout': 30}}
 
@@ -19,7 +23,8 @@ from database import db
 db.init_app(app)
 
 with app.app_context():
-    db.create_all()
+    if os.environ.get('FLASK_ENV') != 'testing':
+        db.create_all()
 
 CORS(app)
 
@@ -217,8 +222,18 @@ def reject_batch(batch_id):
 
 @app.route('/bookmarks', methods=['GET'])
 def get_bookmarks():
-    """Returns the current state of the database."""
-    bookmarks = Bookmark.query.order_by(Bookmark.id.desc()).all()
+    """Returns the current state of the database, optionally filtered by search query."""
+    query = request.args.get('q')
+    
+    if query:
+        search_term = f"%{query}%"
+        bookmarks = Bookmark.query.filter(
+            (Bookmark.title.ilike(search_term)) | 
+            (Bookmark.url.ilike(search_term))
+        ).order_by(Bookmark.id.desc()).all()
+    else:
+        bookmarks = Bookmark.query.order_by(Bookmark.id.desc()).all()
+        
     return jsonify({"status": "success", "data": [b.to_dict() for b in bookmarks]})
 
 @app.route('/upload_bulk', methods=['POST'])
