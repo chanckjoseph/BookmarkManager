@@ -344,22 +344,36 @@ def reject_batch(batch_id):
 
 @app.route('/bookmarks', methods=['GET'])
 def get_bookmarks():
-    """Returns the current state of the database with eager-loaded tags."""
+    """Returns a paginated list of bookmarks with eager-loaded tags."""
     from sqlalchemy.orm import joinedload
     query_term = request.args.get('q')
+    limit = request.args.get('limit', type=int)
+    offset = request.args.get('offset', type=int, default=0)
     
     base_query = Bookmark.query.options(joinedload(Bookmark.tags)).order_by(Bookmark.id.desc())
 
     if query_term:
         search_term = f"%{query_term}%"
-        bookmarks = base_query.filter(
+        base_query = base_query.filter(
             (Bookmark.title.ilike(search_term)) | 
             (Bookmark.url.ilike(search_term))
-        ).all()
-    else:
-        bookmarks = base_query.all()
+        )
+    
+    # Get total count before slicing for pagination metadata
+    total_count = base_query.count()
+    
+    if limit:
+        base_query = base_query.limit(limit).offset(offset)
         
-    return jsonify({"status": "success", "bookmarks": [b.to_dict() for b in bookmarks]})
+    bookmarks = base_query.all()
+        
+    return jsonify({
+        "status": "success", 
+        "total": total_count,
+        "limit": limit,
+        "offset": offset,
+        "bookmarks": [b.to_dict() for b in bookmarks]
+    })
 
 @app.route('/upload_bulk', methods=['POST'])
 def upload_bulk():
