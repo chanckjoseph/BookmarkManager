@@ -184,6 +184,57 @@
             border-color: var(--accent);
             color: var(--accent);
         }
+
+        /* Tree View Styles */
+        #folder-tree {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .tree-item {
+            cursor: pointer;
+            padding: 4px 0;
+            display: flex;
+            align-items: center;
+            color: #cbd5e1;
+        }
+
+        .tree-item:hover {
+            color: #fff;
+        }
+
+        .tree-item.active {
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        .tree-toggle {
+            width: 20px;
+            text-align: center;
+            margin-right: 4px;
+            opacity: 0.5;
+            font-size: 0.7rem;
+            transition: transform 0.2s;
+        }
+
+        .tree-toggle.expanded {
+            transform: rotate(90deg);
+        }
+
+        .tree-children {
+            padding-left: 20px;
+            display: none;
+            border-left: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .tree-children.visible {
+            display: block;
+        }
+
+        .folder-icon {
+            margin-right: 6px;
+            opacity: 0.7;
+        }
     </style>
 </head>
 
@@ -191,6 +242,18 @@
     <div class="grid">
         <!-- Sidebar: Tools -->
         <div class="sidebar">
+            <!-- Folder Tree Section -->
+            <section class="glass-card">
+                <h2>Folders</h2>
+                <div class="tree-item active" onclick="filterByFolder(null, this)">
+                    <span class="tree-toggle" style="opacity:0"></span>
+                    <span class="folder-icon">📂</span> All Bookmarks
+                </div>
+                <div id="folder-tree">
+                    <!-- Tree injected here -->
+                </div>
+            </section>
+
             <!-- Single Add Removed from Scope -->
 
             <section class="glass-card" style="margin-top:2rem;">
@@ -413,58 +476,172 @@
             }, 300);
         }
 
+        let state = {
+            allBookmarks: [],
+            currentFolder: null
+        };
+
+        // --- Folder Tree Logic ---
+
+        function buildFolderTree(bookmarks) {
+            const root = {};
+
+            bookmarks.forEach(bm => {
+                if (!bm.folder) return;
+                const parts = bm.folder.split('/').filter(p => p.trim() !== "");
+                let current = root;
+
+                parts.forEach(part => {
+                    if (!current[part]) {
+                        current[part] = { _children: {} };
+                    }
+                    current = current[part]._children;
+                });
+            });
+            return root;
+        }
+
+        function renderFolderTree(node, container, path = "") {
+            const folders = Object.keys(node).sort();
+
+            folders.forEach(folderName => {
+                const fullPath = path ? `${path}/${folderName}` : folderName;
+                const children = node[folderName]._children;
+                const hasChildren = Object.keys(children).length > 0;
+
+                const itemDiv = document.createElement('div');
+
+                const labelDiv = document.createElement('div');
+                labelDiv.className = 'tree-item';
+                labelDiv.onclick = (e) => {
+                    e.stopPropagation();
+                    filterByFolder(fullPath, labelDiv);
+                };
+
+                const toggle = document.createElement('span');
+                toggle.className = 'tree-toggle';
+                if (hasChildren) {
+                    toggle.innerText = '▶';
+                    toggle.onclick = (e) => {
+                        e.stopPropagation();
+                        toggle.classList.toggle('expanded');
+                        const childContainer = itemDiv.querySelector('.tree-children');
+                        childContainer.classList.toggle('visible');
+                    };
+                }
+
+                labelDiv.appendChild(toggle);
+                labelDiv.innerHTML += `<span class="folder-icon">📂</span> ${folderName}`;
+                itemDiv.appendChild(labelDiv);
+
+                if (hasChildren) {
+                    const childContainer = document.createElement('div');
+                    childContainer.className = 'tree-children';
+                    renderFolderTree(children, childContainer, fullPath);
+                    itemDiv.appendChild(childContainer);
+                }
+
+                container.appendChild(itemDiv);
+            });
+        }
+
+        function filterByFolder(path, element) {
+            state.currentFolder = path;
+
+            // UI Highlight
+            document.querySelectorAll('.tree-item').forEach(el => el.classList.remove('active'));
+            if (element) element.classList.add('active');
+
+            refreshListDatasource();
+        }
+
+        function refreshListDatasource() {
+            const tbody = document.getElementById('bookmark-table-body');
+            tbody.innerHTML = '';
+
+            let filtered = state.allBookmarks;
+
+            // Filter by Folder
+            if (state.currentFolder) {
+                filtered = filtered.filter(bm => {
+                    return bm.folder === state.currentFolder || (bm.folder && bm.folder.startsWith(state.currentFolder + '/'));
+                });
+            }
+
+            // Render
+            filtered.forEach(bm => renderRow(bm, tbody));
+        }
+
+        function renderRow(bm, tbody, query = "") { // extracted from refreshList
+            let statusHtml = '<span style="color:#10b981">✓ Synced</span>';
+            let rowStyle = '';
+
+            if (bm.status === 'absent_on_source') {
+                statusHtml = '<span class="badge" style="background:#ef4444; color:#fff">⚠️ Missing in Source</span>';
+                rowStyle = 'opacity: 0.6; background: rgba(239, 68, 68, 0.05);';
+            }
+
+            // Highlighting Logic
+            let displayTitle = bm.title || "No Title";
+            let displayUrl = bm.url;
+
+            if (query) {
+                const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+                displayTitle = displayTitle.replace(regex, '<span class="highlight">$1</span>');
+                displayUrl = displayUrl.replace(regex, '<span class="highlight">$1</span>');
+            }
+
+            // Tags Logic
+            let tagsHtml = '';
+            if (Array.isArray(bm.tags)) {
+                tagsHtml = bm.tags.map(tag => `
+                    <span class="tag-pill">
+                        ${tag.name}
+                        <span class="tag-remove" onclick="removeTag(${bm.id}, ${tag.id})">×</span>
+                    </span>
+                `).join('');
+            }
+
+            const row = `<tr style="${rowStyle}">
+            <td>
+                <strong>${displayTitle}</strong>
+                <br><span style="font-size:0.7rem; opacity:0.5">${displayUrl}</span>
+            </td>
+            <td>
+                ${tagsHtml} 
+                <button class="tag-add-btn" onclick="promptAddTag(${bm.id})">+</button>
+            </td>
+            <td><span class="source-badge">${bm.source}</span></td>
+            <td>${statusHtml}</td>
+        </tr>`;
+            tbody.innerHTML += row;
+        }
+
+        // --- End Folder Logic ---
+
         async function refreshList(query = "") {
             try {
                 const url = query ? `${API_BASE}/bookmarks?q=${encodeURIComponent(query)}` : `${API_BASE}/bookmarks`;
                 const res = await fetch(url);
                 const data = await res.json();
+
+                if (!query) {
+                    state.allBookmarks = data.data; // Cache for folder filtering
+
+                    // Rebuild Tree only on full refresh
+                    const treeContainer = document.getElementById('folder-tree');
+                    treeContainer.innerHTML = '';
+                    const treeRoot = buildFolderTree(state.allBookmarks);
+                    renderFolderTree(treeRoot, treeContainer);
+                }
+
                 const tbody = document.getElementById('bookmark-table-body');
                 tbody.innerHTML = '';
 
-                data.data.forEach(bm => {
-                    let statusHtml = '<span style="color:#10b981">✓ Synced</span>';
-                    let rowStyle = '';
+                // If searching, show search results directly (bypassing folder filter for now, or we can combine)
+                // Let's just render the API results for now.
+                data.data.forEach(bm => renderRow(bm, tbody, query));
 
-                    if (bm.status === 'absent_on_source') {
-                        statusHtml = '<span class="badge" style="background:#ef4444; color:#fff">⚠️ Missing in Source</span>';
-                        rowStyle = 'opacity: 0.6; background: rgba(239, 68, 68, 0.05);';
-                    }
-
-                    // Highlighting Logic
-                    let displayTitle = bm.title || "No Title";
-                    let displayUrl = bm.url;
-
-                    if (query) {
-                        const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-                        displayTitle = displayTitle.replace(regex, '<span class="highlight">$1</span>');
-                        displayUrl = displayUrl.replace(regex, '<span class="highlight">$1</span>');
-                    }
-
-                    // Tags Logic
-                    let tagsHtml = '';
-                    if (Array.isArray(bm.tags)) {
-                        tagsHtml = bm.tags.map(tag => `
-                            <span class="tag-pill">
-                                ${tag.name}
-                                <span class="tag-remove" onclick="removeTag(${bm.id}, ${tag.id})">×</span>
-                            </span>
-                        `).join('');
-                    }
-
-                    const row = `<tr style="${rowStyle}">
-                    <td>
-                        <strong>${displayTitle}</strong>
-                        <br><span style="font-size:0.7rem; opacity:0.5">${displayUrl}</span>
-                    </td>
-                    <td>
-                        ${tagsHtml} 
-                        <button class="tag-add-btn" onclick="promptAddTag(${bm.id})">+</button>
-                    </td>
-                    <td><span class="source-badge">${bm.source}</span></td>
-                    <td>${statusHtml}</td>
-                </tr>`;
-                    tbody.innerHTML += row;
-                });
             } catch (e) { console.error("Load failed", e); }
         }
 
