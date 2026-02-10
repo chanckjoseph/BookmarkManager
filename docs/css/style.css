@@ -81,6 +81,21 @@ body {
     font-weight: 600;
 }
 
+.sidebar a.btn-nav {
+    background: var(--accent-color);
+    color: var(--bg-color);
+    font-weight: 800;
+    text-align: center;
+    margin-top: 0.5rem;
+    box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);
+}
+
+.sidebar a.btn-nav:hover {
+    background: #fff;
+    color: var(--bg-color);
+    transform: translateY(-2px);
+}
+
 /* Main Content Area */
 .main-content {
     margin-left: var(--sidebar-width);
