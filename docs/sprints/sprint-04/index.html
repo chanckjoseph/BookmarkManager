@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sprint 04: Organization & Search - BookmarkManager</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
+</head>
+
+<body class="dashboard-body">
+    <nav class="sidebar">
+        <!-- JS Populated -->
+    </nav>
+    <script src="../../js/sidebar.js"></script>
+
+    <main class="main-content">
+        <header style="margin-bottom: 2rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h1
+                        style="font-size: 2.5rem; margin-bottom: 0.5rem; background: linear-gradient(135deg, #fff 0%, #a5f3fc 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">
+                        Sprint 04: Organization & Search</h1>
+                    <p style="color: var(--text-dim);">Transforming the collection into a navigable knowledge base.</p>
+                </div>
+                <div class="status-badge"
+                    style="background: #10b981; color: #fff; padding: 5px 15px; border-radius: 20px; font-weight: bold;">
+                    RELEASED</div>
+            </div>
+        </header>
+
+        <section class="glass-card" style="margin-bottom: 2rem;">
+            <h2>The Goal: "Taxonomy & Usability"</h2>
+            <p>This sprint focused on making the data usable. We implemented advanced search, hierarchical folder
+                navigation, and a flexible tagging system.</p>
+        </section>
+
+        <section class="glass-card" style="margin-bottom: 2rem;">
+            <h2>Sprint Roadmap</h2>
+
+            <div style="margin-top: 1.5rem;">
+                <h3 style="color: #10b981; display: flex; align-items: center; gap: 10px;">
+                    Phase 1: Search & Filtering
+                    <span class="badge" style="background: #10b981; font-size: 0.7rem;">COMPLETE</span>
+                </h3>
+                <p style="margin-left: 2rem; color: var(--text-dim);">
+                    <strong>Delivery:</strong> Instant search bar with term highlighting and SQL-backed filtering.<br>
+                    <strong>Status:</strong> Users can find any bookmark in milliseconds.
+                </p>
+            </div>
+
+            <div style="margin-top: 1.5rem;">
+                <h3 style="color: #10b981; display: flex; align-items: center; gap: 10px;">
+                    Phase 2: Tagging System
+                    <span class="badge" style="background: #10b981; font-size: 0.7rem;">COMPLETE</span>
+                </h3>
+                <p style="margin-left: 2rem; color: var(--text-dim);">
+                    <strong>Delivery:</strong> Many-to-Many tagging logic, Tag Pills in UI, and Add/Remove
+                    interactions.<br>
+                    <strong>Status:</strong> Flexible categorization is live.
+                </p>
+            </div>
+
+            <div style="margin-top: 1.5rem;">
+                <h3 style="color: #10b981; display: flex; align-items: center; gap: 10px;">
+                    Phase 3: Folder Tree UI
+                    <span class="badge" style="background: #10b981; font-size: 0.7rem;">COMPLETE</span>
+                </h3>
+                <p style="margin-left: 2rem; color: var(--text-dim);">
+                    <strong>Delivery:</strong> Recursive folder parsing in the Sidebar and collapsible tree view.<br>
+                    <strong>Status:</strong> Structural hierarchy is mirrored from browser sources.
+                </p>
+            </div>
+
+            <div style="margin-top: 1.5rem;">
+                <h3 style="color: #10b981; display: flex; align-items: center; gap: 10px;">
+                    Phase 4: Chrome Integration
+                    <span class="badge" style="background: #10b981; font-size: 0.7rem;">COMPLETE</span>
+                </h3>
+                <p style="margin-left: 2rem; color: var(--text-dim);">
+                    <strong>Delivery:</strong> Safe one-way sync for Chrome JSON bookmarks via review batches.<br>
+                    <strong>Status:</strong> Multi-browser support achieved.
+                </p>
+            </div>
+        </section>
+    </main>
+</body>
+
+</html>
