@@ -7,7 +7,10 @@ from datetime import datetime
 from parser import parse_netscape_bookmarks
 from chrome_parser import parse_chrome_bookmarks
 from env_scan_v2 import get_browser_profiles
-from database import db, Bookmark, SyncBatch, PendingChange
+from database import db, Bookmark, SyncBatch, PendingChange, Tag
+
+# ... (Previous code)
+
 
 app = Flask(__name__, template_folder='.')
 # Database Configuration
@@ -283,6 +286,62 @@ def trigger_open_folder():
         success = open_folder(path)
         return jsonify({"status": "success" if success else "error"})
     return jsonify({"status": "error", "message": "Unauthorized path"}), 403
+
+@app.route('/tags', methods=['GET', 'POST'])
+def manage_tags():
+    """List all tags or create a new one."""
+    if request.method == 'GET':
+        tags = Tag.query.order_by(Tag.name).all()
+        return jsonify({"status": "success", "data": [t.to_dict() for t in tags]})
+    
+    if request.method == 'POST':
+        data = request.json
+        name = data.get('name', '').strip()
+        if not name:
+            return jsonify({"status": "error", "message": "Tag name required"}), 400
+            
+        existing = Tag.query.filter_by(name=name).first()
+        if existing:
+            return jsonify({"status": "error", "message": "Tag already exists"}), 409
+            
+        tag = Tag(name=name)
+        db.session.add(tag)
+        db.session.commit()
+        return jsonify({"status": "success", "data": tag.to_dict()})
+
+@app.route('/bookmarks/<int:bookmark_id>/tags', methods=['POST'])
+def add_tag_to_bookmark(bookmark_id):
+    """Attach a tag to a bookmark."""
+    bookmark = Bookmark.query.get_or_404(bookmark_id)
+    data = request.json
+    tag_name = data.get('name', '').strip()
+    
+    if not tag_name:
+        return jsonify({"status": "error", "message": "Tag name required"}), 400
+        
+    # Find or Create Tag
+    tag = Tag.query.filter_by(name=tag_name).first()
+    if not tag:
+        tag = Tag(name=tag_name)
+        db.session.add(tag)
+    
+    if tag not in bookmark.tags:
+        bookmark.tags.append(tag)
+        db.session.commit()
+        
+    return jsonify({"status": "success", "data": bookmark.to_dict()})
+
+@app.route('/bookmarks/<int:bookmark_id>/tags/<int:tag_id>', methods=['DELETE'])
+def remove_tag_from_bookmark(bookmark_id, tag_id):
+    """Remove a tag from a bookmark."""
+    bookmark = Bookmark.query.get_or_404(bookmark_id)
+    tag = Tag.query.get_or_404(tag_id)
+    
+    if tag in bookmark.tags:
+        bookmark.tags.remove(tag)
+        db.session.commit()
+        
+    return jsonify({"status": "success", "data": bookmark.to_dict()})
 
 if __name__ == '__main__':
     app.run(port=5000)

@@ -145,6 +145,45 @@
             border-radius: 2px;
             padding: 0 2px;
         }
+
+        .tag-pill {
+            background: rgba(56, 189, 248, 0.2);
+            color: var(--accent);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            margin-right: 4px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 2px;
+        }
+
+        .tag-remove {
+            cursor: pointer;
+            opacity: 0.6;
+            font-weight: bold;
+        }
+
+        .tag-remove:hover {
+            opacity: 1;
+            color: #fff;
+        }
+
+        .tag-add-btn {
+            background: none;
+            border: 1px dashed var(--border);
+            color: #aaa;
+            border-radius: 12px;
+            padding: 2px 8px;
+            cursor: pointer;
+            font-size: 0.75rem;
+        }
+
+        .tag-add-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
     </style>
 </head>
 
@@ -188,6 +227,7 @@
                     <thead>
                         <tr>
                             <th>Title</th>
+                            <th>Tags</th>
                             <th>Source</th>
                             <th>Status</th>
                         </tr>
@@ -400,10 +440,25 @@
                         displayUrl = displayUrl.replace(regex, '<span class="highlight">$1</span>');
                     }
 
+                    // Tags Logic
+                    let tagsHtml = '';
+                    if (Array.isArray(bm.tags)) {
+                        tagsHtml = bm.tags.map(tag => `
+                            <span class="tag-pill">
+                                ${tag.name}
+                                <span class="tag-remove" onclick="removeTag(${bm.id}, ${tag.id})">×</span>
+                            </span>
+                        `).join('');
+                    }
+
                     const row = `<tr style="${rowStyle}">
                     <td>
                         <strong>${displayTitle}</strong>
                         <br><span style="font-size:0.7rem; opacity:0.5">${displayUrl}</span>
+                    </td>
+                    <td>
+                        ${tagsHtml} 
+                        <button class="tag-add-btn" onclick="promptAddTag(${bm.id})">+</button>
                     </td>
                     <td><span class="source-badge">${bm.source}</span></td>
                     <td>${statusHtml}</td>
@@ -454,6 +509,38 @@
             const data = await res.json();
             alert(`Parsed ${data.count} items!`);
             refreshList();
+        }
+
+        async function promptAddTag(bookmarkId) {
+            const name = prompt("Enter tag name:");
+            if (!name) return;
+
+            try {
+                const res = await fetch(`${API_BASE}/bookmarks/${bookmarkId}/tags`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name })
+                });
+                if (res.ok) {
+                    refreshList();
+                } else {
+                    alert("Failed to add tag");
+                }
+            } catch (e) { alert(e); }
+        }
+
+        async function removeTag(bookmarkId, tagId) {
+            if (!confirm("Remove this tag?")) return;
+            try {
+                const res = await fetch(`${API_BASE}/bookmarks/${bookmarkId}/tags/${tagId}`, {
+                    method: 'DELETE'
+                });
+                if (res.ok) {
+                    refreshList();
+                } else {
+                    alert("Failed to remove tag");
+                }
+            } catch (e) { alert(e); }
         }
 
         init();

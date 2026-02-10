@@ -27,8 +27,32 @@ class Bookmark(db.Model):
             "title": self.title,
             "folder": self.folder_path,
             "source": f"{self.source_browser} ({self.version})",
-            "status": self.status
+            "status": self.status,
+            "tags": [t.to_dict() for t in self.tags]
         }
+
+# Association Table for Many-to-Many
+bookmark_tags = db.Table('bookmark_tags',
+    db.Column('bookmark_id', db.Integer, db.ForeignKey('bookmarks.id'), primary_key=True),
+    db.Column('tag_id', db.Integer, db.ForeignKey('tags.id'), primary_key=True)
+)
+
+class Tag(db.Model):
+    """Tags for categorizing bookmarks."""
+    __tablename__ = 'tags'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), unique=True, nullable=False)
+
+    def to_dict(self):
+        return {"id": self.id, "name": self.name}
+
+# Add relationship to Bookmark (Monkey-patching or defining here if circular)
+# For simplicity, we define the backref on Tag, but since Bookmark is already defined above,
+# we need to be careful. Ideally, relationship is defined on Bookmark or Tag.
+# Let's add it to Tag, referring to 'Bookmark' by string to avoid order issues.
+Tag.bookmarks = db.relationship('Bookmark', secondary=bookmark_tags, lazy='subquery',
+        backref=db.backref('tags', lazy=True))
 
 class SyncBatch(db.Model):
     """A transaction log for sync operations."""
