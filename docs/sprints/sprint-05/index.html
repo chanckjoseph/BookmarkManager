@@ -22,59 +22,62 @@
                     <h1 class="text-gradient">Sprint 05: UX Excellence & Performance</h1>
                     <p>Elevating the user experience with fluid interactions and optimized speed.</p>
                 </div>
-                <div class="badge badge-planning">PLANNING</div>
+                <div class="badge badge-released">COMPLETED</div>
             </div>
         </header>
 
         <section class="glass-card">
             <h2>The Goal: "Polish & Scale"</h2>
-            <p>This sprint focuses on transitioning from a functional prototype to a premium application. Key priorities
-                include visual refinements, micro-animations, and backend performance optimizations like pagination and
-                fuzzy search.</p>
+            <p>This sprint successfully transitioned Bookmark Manager from a functional prototype to a premium
+                application. We established a unified single-tree architecture, implemented strict hierarchical
+                filtering, and delivered a high-fidelity dashboard overhaul.</p>
         </section>
 
         <section class="glass-card">
-            <h2>Sprint Roadmap</h2>
+            <h2>Sprint Roadmap (Finalized)</h2>
 
             <div style="margin-top: 1.5rem;">
-                <h3 style="color: #38bdf8; display: flex; align-items: center; gap: 10px;">
-                    Phase 1: Visual Identity & Transitions
-                    <span class="badge badge-planning" style="font-size: 0.7rem;">IN PROGRESS</span>
+                <h3 style="color: #10b981; display: flex; align-items: center; gap: 10px;">
+                    Phase 1: Unified Single-Tree Architecture
+                    <span class="badge badge-released" style="font-size: 0.7rem;">COMPLETED</span>
                 </h3>
                 <p style="margin-left: 2rem;">
-                    Refining the glassmorphic design system and implementing CSS transitions for a seamless, "app-like"
-                    feel during navigation and search.
+                    Consolidated fragmented folder structures into a single cohesive tree under "All Bookmarks,"
+                    ensuring Firefoxpillars (Menu/Toolbar/Other) are correctly mapped as top-level siblings.
                 </p>
             </div>
 
             <div style="margin-top: 1.5rem;">
-                <h3 style="color: #64748b; display: flex; align-items: center; gap: 10px;">
-                    Phase 2: API Performance (Pagination)
-                    <span class="badge badge-backlog" style="font-size: 0.7rem;">BACKLOG</span>
+                <h3 style="color: #10b981; display: flex; align-items: center; gap: 10px;">
+                    Phase 2: Strict Hierarchical Filtering
+                    <span class="badge badge-released" style="font-size: 0.7rem;">COMPLETED</span>
                 </h3>
                 <p style="margin-left: 2rem;">
-                    Scaling the backend to handle large bookmark collections by implementing limit/offset pagination in
-                    the `/bookmarks` API.
+                    Implemented "Strict Mode" for folder selection. Folders and the Root node now only display their
+                    direct children, preventing recursive content leakage and matching professional file-system
+                    behavior.
                 </p>
             </div>
 
             <div style="margin-top: 1.5rem;">
-                <h3 style="color: #64748b; display: flex; align-items: center; gap: 10px;">
-                    Phase 3: Advanced Retrieval (Fuzzy Search)
-                    <span class="badge badge-backlog" style="font-size: 0.7rem;">BACKLOG</span>
+                <h3 style="color: #10b981; display: flex; align-items: center; gap: 10px;">
+                    Phase 3: Premium UI Overhaul
+                    <span class="badge badge-released" style="font-size: 0.7rem;">COMPLETED</span>
                 </h3>
                 <p style="margin-left: 2rem;">
-                    Implementing multi-term and partial matching logic to help users find bookmarks more intuitively.
+                    Refactored the dashboard with a high-fidelity glassmorphic design, customized scrollbars, and
+                    optimized typography (Inter/Outfit) for a superior UX.
                 </p>
             </div>
 
             <div style="margin-top: 1.5rem;">
-                <h3 style="color: #64748b; display: flex; align-items: center; gap: 10px;">
-                    Phase 4: Environment Formalization
-                    <span class="badge badge-backlog" style="font-size: 0.7rem;">BACKLOG</span>
+                <h3 style="color: #10b981; display: flex; align-items: center; gap: 10px;">
+                    Phase 4: API Performance & Fuzzy Search
+                    <span class="badge badge-released" style="font-size: 0.7rem;">COMPLETED</span>
                 </h3>
                 <p style="margin-left: 2rem;">
-                    Standardizing dev/test/prod configurations using `.env` files and environment variables.
+                    Implemented backend pagination, fuzzy search matching, and database indexing to maintain performance
+                    at scale.
                 </p>
             </div>
         </section>
