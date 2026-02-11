@@ -11,7 +11,7 @@ const SIDEBAR_CONFIG = [
     {
         category: "Primary Actions",
         links: [
-            { text: "🚀 Launch Application", path: "../prototype/dashboard.html", isButton: true }
+            { text: "🚀 Launch Application", path: "http://localhost:5000/dashboard", isButton: true, isExternal: true }
         ]
     },
     {
@@ -58,8 +58,8 @@ function renderSidebar() {
         } else if (item.category) {
             html += `<h3>${item.category}</h3><ul>`;
             item.links.forEach(link => {
-                const fullPath = prefix + link.path;
-                const isActive = window.location.pathname.endsWith(link.path);
+                const fullPath = link.isExternal ? link.path : prefix + link.path;
+                const isActive = !link.isExternal && window.location.pathname.endsWith(link.path);
                 const activeClass = isActive ? 'class="active"' : '';
                 const btnClass = link.isButton ? 'class="btn-nav"' : '';
 

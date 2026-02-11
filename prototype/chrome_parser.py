@@ -4,21 +4,25 @@ import os
 def parse_chrome_bookmarks(file_path):
     """
     Parses a native Chrome JSON Bookmarks file.
+    Returns a dict with bookmarks and count metadata for verification.
     """
     if not os.path.exists(file_path):
-        return []
+        return {"bookmarks": [], "metadata": {"source_total": 0, "processed": 0}}
 
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
         
         bookmarks = []
+        source_total = 0
         
         def walk_tree(node, current_path="", is_root=False):
+            nonlocal source_total
             if isinstance(node, dict):
                 node_name = node.get('name')
                 
                 if node.get('type') == 'url':
+                    source_total += 1
                     bookmarks.append({
                         "title": node_name,
                         "url": node.get('url'),
@@ -50,11 +54,17 @@ def parse_chrome_bookmarks(file_path):
         for root_key, root_node in roots.items():
             label = root_mapping.get(root_key, root_node.get('name', root_key))
             walk_tree(root_node, label, is_root=True)
-            
-        return bookmarks
+        
+        return {
+            "bookmarks": bookmarks,
+            "metadata": {
+                "source_total": source_total,
+                "processed": len(bookmarks)
+            }
+        }
     except Exception as e:
         print(f"Error parsing Chrome JSON: {e}")
-        return []
+        return {"bookmarks": [], "metadata": {"source_total": 0, "processed": 0, "error": str(e)}}
 
 if __name__ == "__main__":
     # Test path for Linux

@@ -39,8 +39,8 @@ def onboarding():
 def tools():
     return render_template('tools.html')
 
-@app.route('/history')
-def history():
+@app.route('/audit-history')
+def audit_history():
     return render_template('history.html')
 
 # ... (Previous code)
@@ -73,7 +73,9 @@ def sync_firefox():
     try:
         from firefox_reader import get_firefox_bookmarks
         # 1. Read Incoming Data (The Feed)
-        incoming_bookmarks = get_firefox_bookmarks(os.path.join(profile_path, "places.sqlite"))
+        result = get_firefox_bookmarks(os.path.join(profile_path, "places.sqlite"))
+        incoming_bookmarks = result["bookmarks"]
+        metadata = result["metadata"]
         
         # 2. Fetch Existing State for this Source
         # We only compare against bookmarks from 'firefox' to ensure safety
@@ -136,12 +138,36 @@ def sync_firefox():
         if changes:
             db.session.bulk_save_objects(changes)
             db.session.commit()
-        else:
-            # If no changes, maybe auto-approve empty batch or just leave empty?
-            # Let's leave it empty to show "Sync Checked - No Changes"
-            pass
         
-        return jsonify({"status": "success", "batch_id": batch.id, "count": len(changes)})
+        # Count verification
+        new_count = sum(1 for c in changes if c.change_type == "new")
+        update_count = sum(1 for c in changes if c.change_type == "update")
+        delete_count = sum(1 for c in changes if c.change_type == "mark_deleted")
+        
+        # Build count report
+        counts = {
+            "source_total": metadata["source_total"],
+            "tags_filtered": metadata.get("tags_filtered", 0),
+            "invalid_urls": metadata.get("invalid_urls", 0),
+            "processed": metadata["processed"],
+            "new": new_count,
+            "updated": update_count,
+            "to_delete": delete_count,
+            "total_changes": len(changes)
+        }
+        
+        # Verify count integrity
+        warnings = []
+        expected_processed = metadata["source_total"] - metadata.get("tags_filtered", 0) - metadata.get("invalid_urls", 0)
+        if metadata["processed"] != expected_processed:
+            warnings.append(f"Count mismatch: Expected {expected_processed} processed, got {metadata['processed']}")
+        
+        # Log to server for debugging
+        print(f"[SYNC VERIFICATION] Firefox: {counts}")
+        if warnings:
+            print(f"[SYNC WARNING] {warnings}")
+        
+        return jsonify({"status": "success", "batch_id": batch.id, "counts": counts, "warnings": warnings})
 
     except Exception as e:
         db.session.rollback()
@@ -165,7 +191,9 @@ def sync_chrome():
              return jsonify({"status": "error", "message": "Bookmarks file not found"}), 404
 
         # 1. Read Incoming Data
-        incoming_bookmarks = parse_chrome_bookmarks(bookmarks_file)
+        result = parse_chrome_bookmarks(bookmarks_file)
+        incoming_bookmarks = result["bookmarks"]
+        metadata = result["metadata"]
         
         # 2. Fetch Existing State for this Source
         # Compare against 'chrome%' source_browser
@@ -224,11 +252,47 @@ def sync_chrome():
             db.session.bulk_save_objects(changes)
             db.session.commit()
         
-        return jsonify({"status": "success", "batch_id": batch.id, "count": len(changes)})
+        # Count verification
+        new_count = sum(1 for c in changes if c.change_type == "new")
+        update_count = sum(1 for c in changes if c.change_type == "update")
+        delete_count = sum(1 for c in changes if c.change_type == "mark_deleted")
+        
+        # Build count report
+        counts = {
+            "source_total": metadata["source_total"],
+            "processed": metadata["processed"],
+            "new": new_count,
+            "updated": update_count,
+            "to_delete": delete_count,
+            "total_changes": len(changes)
+        }
+        
+        # Verify count integrity
+        warnings = []
+        if metadata["processed"] != metadata["source_total"]:
+            warnings.append(f"Count mismatch: Source has {metadata['source_total']} bookmarks, but only {metadata['processed']} were processed")
+        if "error" in metadata:
+            warnings.append(f"Parser error: {metadata['error']}")
+        
+        # Log to server for debugging
+        print(f"[SYNC VERIFICATION] Chrome: {counts}")
+        if warnings:
+            print(f"[SYNC WARNING] {warnings}")
+        
+        return jsonify({"status": "success", "batch_id": batch.id, "counts": counts, "warnings": warnings})
 
     except Exception as e:
         db.session.rollback()
         return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route('/api/history', methods=['GET'])
+def get_all_history():
+    """Returns a global feed of recent bookmark changes."""
+    history = BookmarkHistory.query.order_by(BookmarkHistory.created_at.desc()).limit(100).all()
+    return jsonify({
+        "status": "success",
+        "history": [h.to_dict() for h in history]
+    })
 
 @app.route('/sync/batches', methods=['GET'])
 def get_pending_batches():
@@ -240,7 +304,7 @@ def get_pending_batches():
             "id": b.id,
             "source": b.source,
             "created_at": b.created_at,
-            "count": len(b.changes)
+            "count": PendingChange.query.filter_by(batch_id=b.id).count()
         } for b in batches]
     })
 
@@ -273,15 +337,18 @@ def commit_batch(batch_id):
         # Get specific IDs to commit, or commit all if None
         data_json = request.json if request.is_json else {}
         ids_to_commit = data_json.get('change_ids')
+        ids_set = set(ids_to_commit) if ids_to_commit is not None else None
         
         count = 0
-        changes_to_process = []
+        changes_to_process = [c for c in batch.changes if ids_set is None or c.id in ids_set]
+        total = len(changes_to_process)
         
-        for change in batch.changes:
-            if ids_to_commit is None or change.id in ids_to_commit:
-                changes_to_process.append(change)
+        print(f"[SYNC COMMIT] Processing {total} changes...")
 
-        for change in changes_to_process:
+        for i, change in enumerate(changes_to_process):
+            if i > 0 and i % 100 == 0:
+                print(f"  Processed {i}/{total} changes...")
+                
             data = change.get_diff()
             
             if change.change_type == 'new':
@@ -315,17 +382,22 @@ def commit_batch(batch_id):
                     db.session.delete(bm)
                     count += 1
             
-            # Remove the change from the batch after processing
+            # Stage change for deletion
             db.session.delete(change)
+        
+        print(f"[SYNC COMMIT] Finalizing {count} changes...")
         
         # If all changes are gone, mark batch as committed
         db.session.flush() # Ensure deletes are registered
-        if len(batch.changes) == 0:
+        
+        # Robust check for remaining changes
+        remaining_count = PendingChange.query.filter_by(batch_id=batch.id).count()
+        if remaining_count == 0:
             batch.status = 'committed'
             batch.completed_at = datetime.utcnow()
             
         db.session.commit()
-        return jsonify({"status": "success", "count": count, "remaining": len(batch.changes)})
+        return jsonify({"status": "success", "count": count, "remaining": remaining_count})
         
     except Exception as e:
         db.session.rollback()
@@ -342,9 +414,11 @@ def reject_batch(batch_id):
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
+@app.route('/api/bookmarks', methods=['GET'])
 @app.route('/bookmarks', methods=['GET'])
 def get_bookmarks():
     """Returns a paginated list of bookmarks with eager-loaded tags."""
+    # ... (rest of function)
     from sqlalchemy.orm import joinedload
     query_term = request.args.get('q')
     limit = request.args.get('limit', type=int)
@@ -389,13 +463,43 @@ def upload_bulk():
     if filename.endswith('.html'):
         new_data = parse_netscape_bookmarks(content)
     elif filename.endswith('.json') or filename == 'Bookmarks':
-        # Temporary save to pass to chrome_parser (logic improvement)
-        temp_path = "/tmp/temp_bookmarks"
-        with open(temp_path, 'w') as f:
-            f.write(content)
-        new_data = parse_chrome_bookmarks(temp_path)
+        try:
+            import json
+            data = json.loads(content)
+            if isinstance(data, list):
+                new_data = data
+            elif isinstance(data, dict):
+                if "bookmarks" in data and isinstance(data["bookmarks"], list):
+                    new_data = data["bookmarks"]
+                else:
+                    # Possibly Chrome format? Fallback to specialized parser
+                    temp_path = f"/tmp/temp_bookmarks_{os.getpid()}"
+                    with open(temp_path, 'w') as f:
+                        f.write(content)
+                    result = parse_chrome_bookmarks(temp_path)
+                    new_data = result.get('bookmarks', [])
+                    if os.path.exists(temp_path):
+                        os.remove(temp_path)
+        except Exception:
+            # Fallback to chrome_parser if raw JSON load fails
+            temp_path = f"/tmp/temp_bookmarks_{os.getpid()}"
+            with open(temp_path, 'w') as f:
+                f.write(content)
+            result = parse_chrome_bookmarks(temp_path)
+            new_data = result.get('bookmarks', [])
+            if os.path.exists(temp_path):
+                os.remove(temp_path)
     
-    for bm in new_data:
+    # Ensure items are dicts
+    valid_bookmarks = []
+    if isinstance(new_data, list):
+        for bm in new_data:
+            if isinstance(bm, dict):
+                valid_bookmarks.append(bm)
+            elif isinstance(bm, str):
+                valid_bookmarks.append({"url": bm, "title": "Imported Bookmark"})
+    
+    for bm in valid_bookmarks:
         new_bm = Bookmark(
             url=bm.get('url'),
             title=bm.get('title'),
@@ -486,14 +590,6 @@ def remove_tag_from_bookmark(bookmark_id, tag_id):
         
     return jsonify({"status": "success", "data": bookmark.to_dict()})
 
-@app.route('/history', methods=['GET'])
-def get_all_history():
-    """Returns a global feed of recent bookmark changes."""
-    history = BookmarkHistory.query.order_by(BookmarkHistory.created_at.desc()).limit(100).all()
-    return jsonify({
-        "status": "success",
-        "history": [h.to_dict() for h in history]
-    })
 
 @app.route('/bookmarks/<int:bookmark_id>/history', methods=['GET'])
 def get_bookmark_history(bookmark_id):
