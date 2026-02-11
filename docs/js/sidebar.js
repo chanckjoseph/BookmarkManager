@@ -11,7 +11,7 @@ const SIDEBAR_CONFIG = [
     {
         category: "Primary Actions",
         links: [
-            { text: "🚀 Launch Application", path: "/dashboard", isButton: true, isExternal: true }
+            { text: "🚀 Launch Application", path: "http://localhost:5000/dashboard", isButton: true, isExternal: true }
         ]
     },
     {

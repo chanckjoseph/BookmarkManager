@@ -104,7 +104,7 @@
     <nav class="global-nav">
         <a href="/dashboard" class="nav-icon" title="Dashboard">🏠</a>
         <a href="/tools" class="nav-icon" title="Tools">🛠️</a>
-        <a href="/history" class="nav-icon active" title="History">📜</a>
+        <a href="/audit-history" class="nav-icon active" title="History">📜</a>
     </nav>
     <main class="main-content">
         <h1>Audit History</h1>
@@ -154,7 +154,7 @@
 
         async function init() {
             try {
-                const res = await fetch(`${API_BASE}/history`);
+                const res = await fetch(`${API_BASE}/api/history`);
                 const data = await res.json();
                 const feed = document.getElementById('history-feed');
                 feed.innerHTML = '';

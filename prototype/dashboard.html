@@ -4,45 +4,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BookmarkManager - Main Dashboard (Verified)</title>
+    <title>Dashboard | Bookmark Manager</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;600;800&display=swap"
+        rel="stylesheet">
     <style>
         :root {
             --accent: #38bdf8;
             --bg: #0f172a;
-            --glass: rgba(255, 255, 255, 0.05);
-            --border: rgba(255, 255, 255, 0.1);
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --sidebar-bg: rgba(15, 23, 42, 0.9);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-color: #f1f5f9;
+            --text-dim: #94a3b8;
+            --accent-glow: rgba(56, 189, 248, 0.15);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
         body {
             background: var(--bg);
-            color: #f1f5f9;
+            background-image:
+                radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.1) 0, transparent 40%),
+                radial-gradient(at 100% 100%, rgba(56, 189, 248, 0.05) 0, transparent 40%);
+            color: var(--text-color);
             font-family: 'Inter', sans-serif;
-            margin: 0;
-            padding: 2rem;
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr 2fr;
-            gap: 2rem;
-            max-width: 1200px;
-            margin: auto;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
         }
 
         .glass-card {
-            background: var(--glass);
-            backdrop-filter: blur(10px);
-            padding: 1.5rem;
-            border-radius: 16px;
-            border: 1px solid var(--border);
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            padding: 2.5rem;
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            flex: 1;
         }
 
         h2 {
             color: var(--accent);
-            font-size: 1.2rem;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
             margin-top: 0;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 0.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
         /* Profile & Import Section */
@@ -61,128 +77,160 @@
             word-break: break-all;
         }
 
-        /* Table Styles */
+        /* Tables & Alignment */
         table {
             width: 100%;
-            border-collapse: collapse;
+            border-collapse: separate;
+            border-spacing: 0;
             margin-top: 1rem;
             font-size: 0.9rem;
         }
 
         th {
             text-align: left;
-            padding: 12px;
-            border-bottom: 2px solid var(--border);
+            padding: 1rem;
+            color: var(--text-dim);
+            font-family: 'Outfit', sans-serif;
+            text-transform: uppercase;
+            font-size: 0.7rem;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid var(--glass-border);
+            font-weight: 600;
         }
 
         td {
-            padding: 12px;
-            border-bottom: 1px solid var(--border);
+            padding: 1.25rem 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            vertical-align: middle;
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.01);
+        }
+
+        .col-title {
+            width: 45%;
+        }
+
+        .col-folder {
+            width: 15%;
+        }
+
+        .col-tags {
+            width: 20%;
+        }
+
+        .col-source {
+            width: 10%;
+        }
+
+        .col-status {
+            width: 10%;
         }
 
         .source-badge {
-            font-size: 0.7rem;
-            padding: 2px 6px;
-            border-radius: 4px;
-            background: var(--accent);
-            color: #000;
+            font-size: 0.65rem;
+            padding: 3px 8px;
+            border-radius: 6px;
+            background: rgba(56, 189, 248, 0.1);
+            color: var(--accent);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.02em;
         }
 
         .btn {
             background: var(--accent);
-            color: #000;
+            color: var(--bg);
             border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
+            padding: 8px 16px;
+            border-radius: 8px;
             cursor: pointer;
-            font-weight: bold;
-            font-size: 0.75rem;
+            font-weight: 700;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+            font-family: 'Outfit', sans-serif;
         }
 
         .btn:hover {
-            opacity: 0.8;
-        }
-
-        .bookmarklet {
-            display: inline-block;
-            padding: 10px 20px;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(56, 189, 248, 0.2);
             background: #fff;
-            color: #000;
-            text-decoration: none;
-            border-radius: 30px;
-            font-weight: bold;
-            margin: 1rem 0;
-            box-shadow: 0 4px 15px rgba(56, 189, 248, 0.4);
         }
 
-        .search-container {
-            flex: 1;
-            margin: 0 2rem;
-            position: relative;
+        .search-area {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 2rem;
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            padding: 1.5rem 2.5rem;
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
         }
 
         .search-input {
             width: 100%;
             background: rgba(0, 0, 0, 0.2);
-            border: 1px solid var(--border);
+            border: 1px solid var(--glass-border);
+            padding: 14px 24px;
+            border-radius: 14px;
+            font-size: 1rem;
             color: #fff;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-family: inherit;
-            outline: none;
             transition: all 0.3s;
+            font-family: 'Inter', sans-serif;
         }
 
         .search-input:focus {
             border-color: var(--accent);
-            box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
-            background: rgba(0, 0, 0, 0.4);
-        }
-
-        .highlight {
-            background: rgba(56, 189, 248, 0.3);
-            color: #fff;
-            border-radius: 2px;
-            padding: 0 2px;
+            background: rgba(0, 0, 0, 0.3);
+            box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.1);
+            outline: none;
         }
 
         .tag-pill {
-            background: rgba(56, 189, 248, 0.2);
+            background: rgba(56, 189, 248, 0.08);
             color: var(--accent);
-            padding: 2px 8px;
-            border-radius: 12px;
+            padding: 4px 10px;
+            border-radius: 8px;
             font-size: 0.75rem;
-            margin-right: 4px;
+            border: 1px solid rgba(56, 189, 248, 0.15);
             display: inline-flex;
             align-items: center;
-            gap: 4px;
-            margin-bottom: 2px;
+            gap: 6px;
+            font-weight: 500;
         }
 
         .tag-remove {
             cursor: pointer;
-            opacity: 0.6;
-            font-weight: bold;
+            opacity: 0.5;
+            font-size: 1rem;
+            line-height: 1;
         }
 
         .tag-remove:hover {
             opacity: 1;
-            color: #fff;
+            color: #ef4444;
         }
 
         .tag-add-btn {
-            background: none;
-            border: 1px dashed var(--border);
-            color: #aaa;
-            border-radius: 12px;
-            padding: 2px 8px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px dashed var(--glass-border);
+            color: var(--text-dim);
+            border-radius: 8px;
+            padding: 4px 8px;
             cursor: pointer;
             font-size: 0.75rem;
+            transition: all 0.2s;
         }
 
         .tag-add-btn:hover {
             border-color: var(--accent);
             color: var(--accent);
+            background: rgba(56, 189, 248, 0.05);
         }
 
         /* Layout Refactor: UX Excellence */
@@ -228,32 +276,65 @@
         .nav-icon.active {
             background: rgba(56, 189, 248, 0.1);
             color: var(--accent);
-            box-shadow: 0 0 15px rgba(56, 189, 248, 0.15);
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.1);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(56, 189, 248, 0.2);
         }
 
         .layout-container {
             display: flex;
             flex: 1;
+            height: 100vh;
             overflow: hidden;
         }
 
         .context-sidebar {
-            width: 280px;
-            background: rgba(15, 23, 42, 0.5);
-            border-right: 1px solid var(--border);
+            width: 300px;
+            background: var(--sidebar-bg);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid var(--glass-border);
             display: flex;
             flex-direction: column;
             padding: 2rem 1.5rem;
             overflow-y: auto;
             flex-shrink: 0;
-            backdrop-filter: blur(10px);
+        }
+
+        .sidebar-title {
+            font-family: 'Outfit', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            margin-bottom: 2rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--glass-border);
         }
 
         .main-stage {
             flex: 1;
             overflow-y: auto;
-            padding: 2rem 3rem;
-            background: radial-gradient(circle at top right, rgba(15, 23, 42, 0.4), transparent);
+            padding: 3rem;
+            background: rgba(15, 23, 42, 0.3);
+            display: flex;
+            flex-direction: column;
+            gap: 2.5rem;
         }
 
         /* Minimalist Table & Alignment */
@@ -573,7 +654,7 @@
     <nav class="global-nav">
         <a href="/dashboard" class="nav-icon active" title="Dashboard">🏠</a>
         <a href="/tools" class="nav-icon" title="Tools">🛠️</a>
-        <a href="/history" class="nav-icon" title="History">📜</a>
+        <a href="/audit-history" class="nav-icon" title="History">📜</a>
     </nav>
 
     <div class="layout-container">
@@ -581,14 +662,8 @@
         <aside class="context-sidebar">
             <h2 class="sidebar-title">Collections</h2>
             <div id="folder-tree-container">
-                <div class="tree-node">
-                    <div class="tree-label active" onclick="filterByFolder(null, this)">
-                        <span class="tree-toggle" style="opacity:0">▶</span>
-                        <span class="folder-icon">📂</span> All Bookmarks
-                    </div>
-                </div>
                 <div id="folder-tree">
-                    <!-- Collapsible Tree injected here -->
+                    <!-- Unified tree injected here -->
                 </div>
             </div>
         </aside>
@@ -605,7 +680,7 @@
 
             <section class="glass-card">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                    <h2 style="border:none; margin:0; font-family: 'Outfit', sans-serif;">Library</h2>
+                    <h2>Library</h2>
                 </div>
                 <table>
                     <thead>
@@ -655,7 +730,7 @@
         function handleSearch(query) {
             clearTimeout(searchDebounce);
             searchDebounce = setTimeout(() => {
-                refreshList(query);
+                refreshListDatasource(query);
             }, 300);
         }
 
@@ -698,19 +773,20 @@
 
         let state = {
             allBookmarks: [],
-            currentFolder: null
+            currentFolder: "All Bookmarks"
         };
 
         // --- Folder Tree Logic ---
 
         function buildFolderTree(bookmarks) {
-            const root = {};
+            const root = {
+                "All Bookmarks": { _children: {}, _isRoot: true }
+            };
 
             bookmarks.forEach(bm => {
-                // Ensure folder strings are normalized
-                // Match the ' > ' separator used in the database
-                const parts = bm.folder.split(' > ').filter(p => p.trim() !== "");
-                let current = root;
+                const folder = bm.folder || "";
+                const parts = folder.split(' > ').filter(p => p.trim() !== "");
+                let current = root["All Bookmarks"]._children;
 
                 parts.forEach(part => {
                     if (!current[part]) {
@@ -726,7 +802,9 @@
             const folders = Object.keys(node).sort();
 
             folders.forEach(folderName => {
-                const fullPath = path ? `${path} > ${folderName}` : folderName;
+                const isSystemRoot = node[folderName]._isRoot;
+                // Path used for filtering should NOT include the virtual "All Bookmarks" root
+                const fullPath = isSystemRoot ? folderName : (path && path !== "All Bookmarks" ? `${path} > ${folderName}` : folderName);
                 const children = node[folderName]._children;
                 const hasChildren = Object.keys(children).length > 0;
 
@@ -788,20 +866,31 @@
             refreshListDatasource();
         }
 
-        function refreshListDatasource() {
+        function refreshListDatasource(searchQuery = "") {
             const tbody = document.getElementById('bookmark-table-body');
             let filtered = state.allBookmarks;
 
-            // Filter by Folder
+            // 1. Filter by Folder: Exact Match for ALL folders (Strict Non-Recursive)
             if (state.currentFolder) {
-                filtered = filtered.filter(bm => {
-                    return bm.folder === state.currentFolder || (bm.folder && bm.folder.startsWith(state.currentFolder + ' > '));
-                });
+                // If "All Bookmarks" is selected, match items with no folder (top level)
+                const targetPath = state.currentFolder === "All Bookmarks" ? "" : state.currentFolder;
+                filtered = filtered.filter(bm => (bm.folder || "") === targetPath);
             }
 
-            // High-Performance Render
+            // 2. Filter by Search Query (if any)
+            if (searchQuery) {
+                const lowQuery = searchQuery.toLowerCase();
+                filtered = filtered.filter(bm =>
+                    (bm.title && bm.title.toLowerCase().includes(lowQuery)) ||
+                    (bm.url && bm.url.toLowerCase().includes(lowQuery))
+                );
+            }
+
+            // 3. High-Performance Render
             const fragment = document.createDocumentFragment();
-            filtered.forEach(bm => renderRow(bm, fragment));
+            const regex = searchQuery ? new RegExp(`(${searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi') : null;
+
+            filtered.forEach(bm => renderRow(bm, fragment, regex));
 
             tbody.innerHTML = '';
             tbody.appendChild(fragment);
@@ -845,8 +934,8 @@
                 <td class="col-folder">
                     <div style="display:flex; align-items:center; gap:6px; opacity:0.8;">
                         <span style="font-size:0.9rem">📂</span> 
-                        <span style="overflow:hidden; text-overflow:ellipsis;" title="${bm.folder || 'Root'}">
-                            ${bm.folder || '<span style="opacity:0.4 italic">Root</span>'}
+                        <span style="overflow:hidden; text-overflow:ellipsis;" title="${bm.folder || 'Top Level'}">
+                            ${bm.folder || '<span style="opacity:0.5; font-style:italic;">Top Level</span>'}
                         </span>
                     </div>
                 </td>
@@ -912,30 +1001,20 @@
 
         // --- End Folder Logic ---
 
-        async function refreshList(query = "") {
-            const tbody = document.getElementById('bookmark-table-body');
+        async function refreshList() {
             try {
-                const url = query ? `${API_BASE}/bookmarks?q=${encodeURIComponent(query)}` : `${API_BASE}/bookmarks`;
-                const res = await fetch(url);
+                const res = await fetch(`${API_BASE}/api/bookmarks`);
                 const data = await res.json();
-                const bookmarks = data.bookmarks || data.data || [];
+                state.allBookmarks = data.bookmarks || data.data || [];
 
-                if (!query) {
-                    state.allBookmarks = bookmarks;
-                    const treeContainer = document.getElementById('folder-tree');
-                    treeContainer.innerHTML = '';
-                    const treeRoot = buildFolderTree(state.allBookmarks);
-                    renderCollapsibleTree(treeRoot, treeContainer);
-                }
+                // Update Tree
+                const treeContainer = document.getElementById('folder-tree');
+                treeContainer.innerHTML = '';
+                const treeRoot = buildFolderTree(state.allBookmarks);
+                renderCollapsibleTree(treeRoot, treeContainer);
 
-                // High-Performance Render
-                const fragment = document.createDocumentFragment();
-                const regex = query ? new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi') : null;
-
-                bookmarks.forEach(bm => renderRow(bm, fragment, regex));
-
-                tbody.innerHTML = '';
-                tbody.appendChild(fragment);
+                // Update Table (respect current folder filter)
+                refreshListDatasource();
 
             } catch (e) { console.error("Load failed", e); }
         }

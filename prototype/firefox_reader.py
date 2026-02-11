@@ -4,7 +4,7 @@ import os
 def get_firefox_bookmarks(sqlite_path):
     """
     Reads bookmarks from a Firefox places.sqlite database.
-    Returns a list of dicts: {'title': str, 'url': str, 'folder': str, 'source': 'Firefox'}
+    Returns a dict with bookmarks and count metadata for verification.
     """
     if not os.path.exists(sqlite_path):
         raise FileNotFoundError(f"Database not found: {sqlite_path}")
@@ -23,6 +23,10 @@ def get_firefox_bookmarks(sqlite_path):
     cursor = conn.cursor()
     
     try:
+        # Count total bookmarks in source DB for verification
+        cursor.execute("SELECT COUNT(*) FROM moz_bookmarks WHERE type=1")
+        source_total = cursor.fetchone()[0]
+        
         # 1. Fetch all bookmark items (folders and bookmarks)
         # type: 1=bookmark, 2=folder
         query = """
@@ -49,25 +53,23 @@ def get_firefox_bookmarks(sqlite_path):
         url_map = dict(cursor.fetchall())
         
         # 4. Helper to build folder path
-        def get_full_path(item_id):
+        def get_full_path(item_id, parent_id):
             path = []
-            curr_id = item_map[item_id]["parent"]
+            curr_id = parent_id
             
             # Traverse up to root (parent=0 or missing)
             while curr_id in item_map:
-                # 0 is the root, 1 is 'Menu', 2 is 'Toolbar', 3 is 'Tags', 5 is 'Unsorted'
-                # We can skip the root(0)
-                if curr_id == 0:
+                if curr_id <= 1: # ID 1 is 'Places Root' (virtual), skip it and stop
                     break
                     
                 parent_data = item_map[curr_id]
                 title = parent_data["title"]
                 
-                # Normalize root folder names for better UX
-                if curr_id == 1: title = "Menu"
-                elif curr_id == 2: title = "Toolbar"
-                elif curr_id == 3: title = "Tags"
-                elif curr_id == 5: title = "Other"
+                # Normalize root pillar names
+                # ID 2 = Menu, ID 3 = Toolbar, ID 5 = Other
+                if curr_id == 2: title = "Bookmarks Menu"
+                elif curr_id == 3: title = "Bookmarks Toolbar"
+                elif curr_id == 5: title = "Other Bookmarks"
                 
                 if title:
                     path.insert(0, title)
@@ -77,19 +79,37 @@ def get_firefox_bookmarks(sqlite_path):
             return " > ".join(path)
 
         bookmarks = []
+        tags_filtered = 0
+        invalid_urls = 0
+        
         for item_id, data in item_map.items():
             if data["type"] == 1: # Bookmark
+                # NOTE: Removed Tags folder (ID 3) filtering per user feedback
+                # Firefox may not always have a Tags folder, and filtering by ID 3
+                # was incorrectly excluding legitimate bookmarks
+                
                 url = url_map.get(data["fk"])
                 if url:
-                    full_path = get_full_path(item_id)
+                    full_path = get_full_path(item_id, data["parent"])
                     bookmarks.append({
                         "title": data["title"] or "No Title",
                         "url": url,
                         "folder": full_path,
                         "source": "Firefox"
                     })
-                    
-        return bookmarks
+                else:
+                    invalid_urls += 1
+        
+        # Return both bookmarks and metadata for count verification
+        return {
+            "bookmarks": bookmarks,
+            "metadata": {
+                "source_total": source_total,
+                "tags_filtered": tags_filtered,
+                "invalid_urls": invalid_urls,
+                "processed": len(bookmarks)
+            }
+        }
 
     finally:
         conn.close()
